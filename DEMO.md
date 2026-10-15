@@ -46,6 +46,19 @@
 **What to say:**
 > *"At 85 mm, the upper valley experiences a catastrophic severance. 5 steep mountain corridors fail simultaneously. Notice how 4 villages—Sonprayag, Kedarnath, Rambara, and Triyuginarayan—are completely cut off from all 3 hospitals, isolating 3,720 people."*
 
+### 3b. Antecedent Soil Saturation ("Prior Wet Days")
+**Action:**
+Set today's slider to **40 mm**, and drag **Rain 24-48h ago** to **60 mm** (Rain 48-72h ago = 0 mm).  
+**What the UI shows:**
+- Display: `Effective rainfall: 70 mm (today + weighted prior days)`
+- Formula: $40 + 0.5 \times 60 + 0.25 \times 0 = 70.0\text{ mm}$
+- Blocked Roads: `4` (`E06, E07, E09, E12`)
+- Isolated Villages: `4` (`Sonprayag, Kedarnath, Rambara, Triyuginarayan`)
+- Isolated Population: `3,720`
+- Note shown: `Weights prototype hain, calibrated nahi.`  
+**What to say:**
+> *"Now notice this realistic crisis capability: Prior Wet Days. If we look at today's rainfall in isolation at 40 mm, roads appear safe. But if yesterday had 60 mm of rain, antecedent soil saturation elevates the effective load to 70 mm. Look at the map: even at 40 mm today, 4 roads snap and 3,720 people in the upper valley are cut off. (Note: the 0.5 and 0.25 decay weights are prototype heuristics, not yet calibrated to hydrological field literature.)"*
+
 ### 4. Cloudburst Crisis (130 mm)
 **Action:** Click the **"Cloudburst Crisis (130 mm)"** preset tab.  
 **What the UI shows:**
