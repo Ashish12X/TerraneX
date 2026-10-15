@@ -75,7 +75,7 @@ def live_rainfall():
 
 @app.get("/live/cascade")
 def live_cascade(
-    basis: str = Query("past_24h", description="past_24h ya next_24h (forecast)")
+    basis: str = Query("past_24h", description="past_24h, next_24h ya effective_72h")
 ):
     """Live rainfall ko seedha cascade simulation mein daalta hai"""
     try:
@@ -83,7 +83,13 @@ def live_cascade(
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=str(e))
 
-    rainfall = live["next_24h_mm"] if basis == "next_24h" else live["past_24h_mm"]
+    if basis == "next_24h":
+        rainfall = live["next_24h_mm"]
+    elif basis == "effective_72h":
+        rainfall = live["effective_72h_mm"]
+    else:
+        rainfall = live["past_24h_mm"]
+
     return {
         "mode": "live",
         "basis": basis,

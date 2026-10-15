@@ -16,7 +16,7 @@ def _fetch():
         "longitude": LON,
         "current": "precipitation",
         "hourly": "precipitation",
-        "past_days": 1,
+        "past_days": 3,
         "forecast_days": 2,
         "timezone": "Asia/Kolkata",
     })
@@ -44,7 +44,11 @@ def get_live_rainfall():
     current_hour = raw["current"]["time"][:13] + ":00"
     idx = times.index(current_hour) if current_hour in times else len(times) // 2
 
-    past_24h = sum(values[max(0, idx - 23): idx + 1])
+    # weights 0.5 aur 0.25 prototype weighting hain, kisi paper se calibrated nahi.
+    p0 = sum(values[max(0, idx - 23): idx + 1])          # 0-24h
+    p1 = sum(values[max(0, idx - 47): max(0, idx - 23)]) # 24-48h
+    p2 = sum(values[max(0, idx - 71): max(0, idx - 47)]) # 48-72h
+    effective = p0 + 0.5 * p1 + 0.25 * p2
     next_24h = sum(values[idx + 1: idx + 25])
 
     data = {
@@ -52,7 +56,10 @@ def get_live_rainfall():
         "location": "Rudraprayag",
         "observed_at": raw["current"]["time"],
         "current_mm_per_hr": raw["current"]["precipitation"],
-        "past_24h_mm": round(past_24h, 1),
+        "past_24h_mm": round(p0, 1),
+        "past_24_48h_mm": round(p1, 1),
+        "past_48_72h_mm": round(p2, 1),
+        "effective_72h_mm": round(effective, 1),
         "next_24h_mm": round(next_24h, 1),
         "cached": False,
     }

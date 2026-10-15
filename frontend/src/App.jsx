@@ -228,9 +228,10 @@ export default function App() {
                 <span className="text-[11px] text-muted-foreground">Auto-updates 10m</span>
               </div>
               <Tabs value={basis} onValueChange={setBasis}>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="past_24h" className="text-xs">Past 24h Rain</TabsTrigger>
-                  <TabsTrigger value="next_24h" className="text-xs">24h Forecast</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="past_24h" className="text-xs">Last 24h</TabsTrigger>
+                  <TabsTrigger value="effective_72h" className="text-xs">72h wet</TabsTrigger>
+                  <TabsTrigger value="next_24h" className="text-xs">Forecast</TabsTrigger>
                 </TabsList>
               </Tabs>
               <div className="flex items-center justify-between text-xs pt-1 text-muted-foreground">
