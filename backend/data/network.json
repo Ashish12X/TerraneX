@@ -447,7 +447,8 @@
         ]
       ],
       "geometry_source": "osm",
-      "susceptibility_source": "dem_terrain_ranking"
+      "susceptibility_source": "dem_terrain_ranking",
+      "gradient_type": "dem_survey"
     },
     {
       "id": "E02",
@@ -805,7 +806,8 @@
         ]
       ],
       "geometry_source": "osm",
-      "susceptibility_source": "dem_terrain_ranking"
+      "susceptibility_source": "dem_terrain_ranking",
+      "gradient_type": "dem_survey"
     },
     {
       "id": "E03",
@@ -1211,14 +1213,15 @@
         ]
       ],
       "geometry_source": "osm",
-      "susceptibility_source": "dem_terrain_ranking"
+      "susceptibility_source": "dem_terrain_ranking",
+      "gradient_type": "dem_survey"
     },
     {
       "id": "E04",
       "from": "V03",
       "to": "V02",
       "length_km": 14,
-      "susceptibility": 0.66,
+      "susceptibility": 0.57,
       "max_gradient_pct": 37.6,
       "mean_gradient_pct": 17.3,
       "susceptibility_old": 0.66,
@@ -1553,7 +1556,8 @@
         ]
       ],
       "geometry_source": "osm",
-      "susceptibility_source": "dem_terrain_ranking"
+      "susceptibility_source": "dem_terrain_ranking",
+      "gradient_type": "dem_survey"
     },
     {
       "id": "E05",
@@ -1907,16 +1911,17 @@
         ]
       ],
       "geometry_source": "osm",
-      "susceptibility_source": "dem_terrain_ranking"
+      "susceptibility_source": "dem_terrain_ranking",
+      "gradient_type": "dem_survey"
     },
     {
       "id": "E06",
       "from": "V07",
       "to": "V04",
       "length_km": 22,
-      "susceptibility": 0.57,
-      "max_gradient_pct": 45.1,
-      "mean_gradient_pct": 10.5,
+      "susceptibility": 0.74,
+      "max_gradient_pct": 95.2,
+      "mean_gradient_pct": 29.4,
       "susceptibility_old": 0.57,
       "coordinates": [
         [
@@ -2246,7 +2251,8 @@
       ],
       "geometry_source": "approximated_corridor",
       "susceptibility_source": "dem_terrain_ranking",
-      "geometry_note": "OSM data had duplicate/wrong segments (ratio was 3.76, wrong road captured). Replaced with corridor approximation along Phata-Sonprayag (Mandakini valley). length_km=22 retained from original data."
+      "geometry_note": "OSM data had duplicate/wrong segments (ratio was 3.76, wrong road captured). Replaced with corridor approximation along Phata-Sonprayag (Mandakini valley). length_km=22 retained from original data.",
+      "gradient_type": "dem_survey"
     },
     {
       "id": "E07",
@@ -2254,8 +2260,8 @@
       "to": "V08",
       "length_km": 12,
       "susceptibility": 0.9,
-      "max_gradient_pct": 89.2,
-      "mean_gradient_pct": 38.2,
+      "max_gradient_pct": 87.6,
+      "mean_gradient_pct": 33.4,
       "susceptibility_old": 0.9,
       "coordinates": [
         [
@@ -2463,18 +2469,19 @@
           79.098
         ]
       ],
-      "geometry_source": "approximated_switchback",
+      "geometry_source": "approximated",
       "susceptibility_source": "dem_terrain_ranking",
-      "geometry_note": "Previous approximation had inflated ratio 3.41. Regenerated with realistic mountain road pattern (target ratio 1.4). length_km=12 retained."
+      "geometry_note": "Previous approximation had inflated ratio 3.41. Regenerated with realistic mountain road pattern (target ratio 1.4). length_km=12 retained.",
+      "gradient_type": "approximate"
     },
     {
       "id": "E08",
       "from": "V04",
       "to": "V06",
       "length_km": 16,
-      "susceptibility": 0.82,
-      "max_gradient_pct": 67.3,
-      "mean_gradient_pct": 31.3,
+      "susceptibility": 0.66,
+      "max_gradient_pct": 50.6,
+      "mean_gradient_pct": 25.2,
       "susceptibility_old": 0.82,
       "coordinates": [
         [
@@ -2802,9 +2809,10 @@
           79.075
         ]
       ],
-      "geometry_source": "approximated_switchback",
+      "geometry_source": "approximated",
       "susceptibility_source": "dem_terrain_ranking",
-      "geometry_note": "Previous approximation had inflated ratio 2.48. Regenerated for Mandakini gorge section (Sonprayag to Rambara/Gaurikund). length_km=16 retained."
+      "geometry_note": "Previous approximation had inflated ratio 2.48. Regenerated for Mandakini gorge section (Sonprayag to Rambara/Gaurikund). length_km=16 retained.",
+      "gradient_type": "approximate"
     },
     {
       "id": "E09",
@@ -2812,8 +2820,8 @@
       "to": "V05",
       "length_km": 7,
       "susceptibility": 0.88,
-      "max_gradient_pct": 65.3,
-      "mean_gradient_pct": 17.9,
+      "max_gradient_pct": 64.9,
+      "mean_gradient_pct": 24.8,
       "susceptibility_old": 0.88,
       "coordinates": [
         [
@@ -3066,7 +3074,8 @@
       "manual_override_reason": "known landslide-prone corridor",
       "road_type": "trek",
       "road_type_note": "Rambara to Kedarnath is a foot trek (~16 km by trail), not a motorable road. Vehicles cannot use this route. Emergency access is by helicopter or on foot only.",
-      "geometry_note": "Geometry approximated along the Mandakini gorge corridor. Actual trek path has more switchbacks than shown. susceptibility=0.88 is a manual expert override based on known landslide history in this corridor (see susceptibility_source field)."
+      "geometry_note": "Geometry approximated along the Mandakini gorge corridor. Actual trek path has more switchbacks than shown. susceptibility=0.88 is a manual expert override based on known landslide history in this corridor (see susceptibility_source field).",
+      "gradient_type": "approximate"
     },
     {
       "id": "E10",
@@ -3105,7 +3114,8 @@
         ]
       ],
       "geometry_source": "osm",
-      "susceptibility_source": "short_edge_default"
+      "susceptibility_source": "short_edge_default",
+      "gradient_type": "dem_survey"
     },
     {
       "id": "E11",
@@ -3148,14 +3158,15 @@
         ]
       ],
       "geometry_source": "osm",
-      "susceptibility_source": "short_edge_default"
+      "susceptibility_source": "short_edge_default",
+      "gradient_type": "dem_survey"
     },
     {
       "id": "E12",
       "from": "V07",
       "to": "V08",
       "length_km": 25,
-      "susceptibility": 0.74,
+      "susceptibility": 0.82,
       "max_gradient_pct": 101.0,
       "mean_gradient_pct": 30.2,
       "susceptibility_old": 0.74,
@@ -3326,7 +3337,8 @@
         ]
       ],
       "geometry_source": "approximated",
-      "susceptibility_source": "dem_terrain_ranking"
+      "susceptibility_source": "dem_terrain_ranking",
+      "gradient_type": "approximate"
     }
   ]
 }

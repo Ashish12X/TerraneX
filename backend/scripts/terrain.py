@@ -92,22 +92,18 @@ def build():
             e["susceptibility"] = 0.88
             e["susceptibility_source"] = "manual_expert_override"
             e["manual_override_reason"] = "known landslide-prone corridor"
-            # E09 is a trek, not a road
             e.setdefault("road_type", "trek")
         elif e["length_km"] < MIN_LEN_KM:
             e["note"] = "short edge: terrain ranking skipped"
             e["susceptibility"] = 0.10
             e["susceptibility_source"] = "short_edge_default"
 
-        # Point 3: Geometry source metadata
-        # Only set geometry_source if it hasn't already been set to a more specific value
-        # (e.g. 'approximated_corridor', 'approximated_switchback' set during geometry fix pass).
-        # Values like 'approximated_corridor' are more informative than plain 'approximated'.
-        if "geometry_source" not in e:
-            if e["id"] in {"E07", "E08", "E09", "E12"}:
-                e["geometry_source"] = "approximated"
-            else:
-                e["geometry_source"] = "osm"
+        # Mark gradient approximation status
+        if e["id"] in {"E07", "E08", "E09", "E12"}:
+            e["geometry_source"] = "approximated"
+            e["gradient_type"] = "approximate"
+        else:
+            e.setdefault("gradient_type", "dem_survey")
 
     with open(OUT_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)

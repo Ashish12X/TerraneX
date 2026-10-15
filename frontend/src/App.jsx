@@ -18,7 +18,7 @@ const RUDRAPRAYAG_ZOOM = 10;
 const DEMO_PRESETS = [
   { label: "Normal (20 mm)", rain: 20, desc: "0 blocked • All 8 villages connected", tag: "Safe" },
   { label: "Pre-alert (55 mm)", rain: 55, desc: "0 blocked • High-slope roads near threshold", tag: "Alert" },
-  { label: "Upper Valley Cutoff (85 mm)", rain: 85, desc: "5 roads blocked • Kedarnath, Rambara, Triyuginarayan cut off (2,740 pop)", tag: "Critical" },
+  { label: "Upper Valley Cutoff (85 mm)", rain: 85, desc: "5 roads blocked • Sonprayag, Kedarnath, Rambara, Triyuginarayan cut off (3,720 pop)", tag: "Critical" },
   { label: "Cloudburst Crisis (130 mm)", rain: 130, desc: "8 roads blocked • 5 villages cut off (4,820 pop)", tag: "Disaster" },
 ];
 
