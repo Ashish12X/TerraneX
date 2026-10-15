@@ -36,6 +36,7 @@ def build_graph(rainfall_mm: float):
             # risky roads ki cost badhti hai -> router safer road prefer karta hai
             cost=e["length_km"] * (1 + 3 * risk),
             coordinates=e.get("coordinates", []),
+            road_type=e.get("road_type", "road"),
         )
 
     usable = nx.Graph()
@@ -62,12 +63,15 @@ def summarize_path(graph, path):
                     e_coords = list(reversed(e_coords))
             coords.extend(e_coords)
 
+    has_foot_trek = any(e.get("road_type") == "trek" for e in edges)
+
     return {
         "nodes": path,
         "names": [graph.nodes[n]["name"] for n in path],
         "distance_km": round(sum(e["length_km"] for e in edges), 1),
         "max_edge_risk": max((e["risk"] for e in edges), default=0.0),
         "coordinates": coords,
+        "has_foot_trek": has_foot_trek,
     }
 
 

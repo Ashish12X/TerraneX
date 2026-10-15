@@ -433,6 +433,16 @@ export default function App() {
                     <div className="rounded-lg bg-muted/60 p-2 font-mono text-[11px] text-primary leading-relaxed">
                       {route.safe_route.names.join(" ➔ ")}
                     </div>
+                    {route.safe_route.has_foot_trek && (
+                      <div className="pt-0.5">
+                        <Badge
+                          variant="outline"
+                          className="border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10px] font-medium px-2 py-0.5"
+                        >
+                          Foot trek section: ambulance cannot pass
+                        </Badge>
+                      </div>
+                    )}
                     {route.rerouted && (
                       <div className="rounded border border-amber-500/30 bg-amber-500/10 p-1.5 text-amber-700 text-[11px]">
                         ⚠️ Primary direct road blocked; dynamically rerouted through secondary safe corridors.
