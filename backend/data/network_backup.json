@@ -1,0 +1,29 @@
+{
+  "nodes": [
+    {"id": "H01", "name": "District Hospital Rudraprayag", "type": "hospital", "lat": 30.2844, "lon": 78.9811},
+    {"id": "H02", "name": "CHC Ukhimath", "type": "hospital", "lat": 30.5180, "lon": 79.0910},
+    {"id": "H03", "name": "PHC Guptkashi", "type": "hospital", "lat": 30.5250, "lon": 79.0710},
+    {"id": "V01", "name": "Augustmuni", "type": "village", "lat": 30.3900, "lon": 79.0230},
+    {"id": "V02", "name": "Ukhimath", "type": "village", "lat": 30.5170, "lon": 79.0900},
+    {"id": "V03", "name": "Guptkashi", "type": "village", "lat": 30.5260, "lon": 79.0700},
+    {"id": "V04", "name": "Sonprayag", "type": "village", "lat": 30.6310, "lon": 79.0780},
+    {"id": "V05", "name": "Kedarnath", "type": "village", "lat": 30.7352, "lon": 79.0669},
+    {"id": "V06", "name": "Rambara", "type": "village", "lat": 30.6850, "lon": 79.0750},
+    {"id": "V07", "name": "Phata", "type": "village", "lat": 30.6080, "lon": 79.0270},
+    {"id": "V08", "name": "Triyuginarayan", "type": "village", "lat": 30.6560, "lon": 79.0980}
+],
+  "edges": [
+    {"id": "E01", "from": "H01", "to": "V01", "length_km": 18, "susceptibility": 0.35},
+    {"id": "E02", "from": "V01", "to": "V03", "length_km": 27, "susceptibility": 0.55},
+    {"id": "E03", "from": "V01", "to": "V02", "length_km": 30, "susceptibility": 0.45},
+    {"id": "E04", "from": "V03", "to": "V02", "length_km": 14, "susceptibility": 0.45},
+    {"id": "E05", "from": "V03", "to": "V07", "length_km": 20, "susceptibility": 0.65},
+    {"id": "E06", "from": "V07", "to": "V04", "length_km": 22, "susceptibility": 0.80},
+    {"id": "E07", "from": "V04", "to": "V08", "length_km": 12, "susceptibility": 0.60},
+    {"id": "E08", "from": "V04", "to": "V06", "length_km": 16, "susceptibility": 0.85},
+    {"id": "E09", "from": "V06", "to": "V05", "length_km": 7, "susceptibility": 0.90},
+    {"id": "E10", "from": "V02", "to": "H02", "length_km": 0.5, "susceptibility": 0.10},
+    {"id": "E11", "from": "V03", "to": "H03", "length_km": 0.5, "susceptibility": 0.10},
+    {"id": "E12", "from": "V07", "to": "V08", "length_km": 25, "susceptibility": 0.40}
+  ]
+}
