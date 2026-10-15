@@ -23,14 +23,52 @@ const DEMO_PRESETS = [
 ];
 
 // Map Pan/Reset Helper Component
-function MapController({ center, zoom, selectedCoord }) {
+function MapController({ selectedCoord, mobileTab }) {
   const map = useMap();
   const prevSelected = useRef(null);
 
+  // Invalidate size when mobile tab changes
   useEffect(() => {
-    if (selectedCoord && selectedCoord !== prevSelected.current) {
-      prevSelected.current = selectedCoord;
-      map.flyTo(selectedCoord, Math.max(map.getZoom(), 11), { duration: 0.8 });
+    if (!map) return;
+    const timer = setTimeout(() => {
+      try {
+        map.invalidateSize();
+      } catch {
+        // Ignored
+      }
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [mobileTab, map]);
+
+  // Handle selected node camera pan
+  useEffect(() => {
+    if (
+      !map ||
+      !selectedCoord ||
+      !Array.isArray(selectedCoord) ||
+      typeof selectedCoord[0] !== "number" ||
+      typeof selectedCoord[1] !== "number" ||
+      isNaN(selectedCoord[0]) ||
+      isNaN(selectedCoord[1])
+    ) {
+      return;
+    }
+
+    const key = `${selectedCoord[0]},${selectedCoord[1]}`;
+    if (key === prevSelected.current) return;
+    prevSelected.current = key;
+
+    try {
+      const z = map.getZoom();
+      const targetZoom = typeof z === "number" && !isNaN(z) ? Math.max(z, 11) : 11;
+      const size = typeof map.getSize === "function" ? map.getSize() : null;
+      if (size && size.x > 100 && size.y > 100) {
+        map.flyTo(selectedCoord, targetZoom, { duration: 0.6 });
+      } else {
+        map.setView(selectedCoord, targetZoom);
+      }
+    } catch {
+      // Ignored
     }
   }, [selectedCoord, map]);
 
@@ -41,6 +79,8 @@ export default function App() {
   const [mode, setMode] = useState("simulation"); // Default to simulation for judges demo
   const [basis, setBasis] = useState("past_24h");
   const [slider, setSlider] = useState(85); // Default to Kedarnath cut-off scenario
+  const [prior1, setPrior1] = useState(0); // Rain 24-48h ago (mm)
+  const [prior2, setPrior2] = useState(0); // Rain 48-72h ago (mm)
   const [live, setLive] = useState(null);
   const [net, setNet] = useState(null);
   const [res, setRes] = useState(null);
@@ -74,7 +114,9 @@ export default function App() {
     };
   }, [mode]);
 
-  const rainfall = mode === "live" ? (live ? live[`${basis}_mm`] : null) : slider;
+  const hasPriorRain = prior1 > 0 || prior2 > 0;
+  const effective = Math.round((slider + 0.5 * prior1 + 0.25 * prior2) * 10) / 10;
+  const rainfall = mode === "live" ? (live ? live[`${basis}_mm`] : null) : effective;
 
   // Rainfall change hone par network + resources fetch karo (debounce ke sath)
   useEffect(() => {
@@ -140,7 +182,13 @@ export default function App() {
 
   const resetMapView = () => {
     if (mapRef.current) {
-      mapRef.current.flyTo(RUDRAPRAYAG_CENTER, RUDRAPRAYAG_ZOOM, { duration: 0.6 });
+      try {
+        const container = mapRef.current.getContainer();
+        if (!container || container.offsetWidth === 0) return;
+        mapRef.current.flyTo(RUDRAPRAYAG_CENTER, RUDRAPRAYAG_ZOOM, { duration: 0.6 });
+      } catch {
+        // Ignored
+      }
     }
   };
 
@@ -248,17 +296,93 @@ export default function App() {
                     {severity.text}
                   </Badge>
                 </div>
-                <b className="text-lg font-mono text-primary">{slider} <span className="text-xs font-normal text-muted-foreground">mm</span></b>
+                <b className="text-lg font-mono text-primary">
+                  {effective} <span className="text-xs font-normal text-muted-foreground">mm</span>
+                  {hasPriorRain && (
+                    <span className="ml-1 text-[10px] font-normal text-muted-foreground">
+                      ({slider} today)
+                    </span>
+                  )}
+                </b>
               </div>
 
-              <Slider
-                min={0}
-                max={150}
-                step={1}
-                value={[slider]}
-                onValueChange={(v) => setSlider(v[0])}
-                className="py-1 cursor-pointer"
-              />
+              <div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-muted-foreground text-[11px]">Today's 24h Rain</span>
+                  <span className="font-mono text-xs font-semibold">{slider} mm</span>
+                </div>
+                <Slider
+                  min={0}
+                  max={150}
+                  step={1}
+                  value={[slider]}
+                  onValueChange={(v) => setSlider(v[0])}
+                  className="py-1 cursor-pointer"
+                />
+              </div>
+
+              {/* Prior Wet Days Controls (24-48h and 48-72h) */}
+              <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+                    Prior wet days (antecedent)
+                  </span>
+                  {hasPriorRain && (
+                    <button
+                      onClick={() => {
+                        setPrior1(0);
+                        setPrior2(0);
+                      }}
+                      className="text-[10px] text-primary hover:underline font-medium"
+                    >
+                      Reset prior
+                    </button>
+                  )}
+                </div>
+
+                {/* Slider 1: Rain 24-48h ago (mm) */}
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground text-[11px]">Rain 24-48h ago (mm)</span>
+                    <b className="font-mono text-[11px]">{prior1} mm</b>
+                  </div>
+                  <Slider
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={[prior1]}
+                    onValueChange={(v) => setPrior1(v[0])}
+                    className="py-0.5 cursor-pointer"
+                  />
+                </div>
+
+                {/* Slider 2: Rain 48-72h ago (mm) */}
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground text-[11px]">Rain 48-72h ago (mm)</span>
+                    <b className="font-mono text-[11px]">{prior2} mm</b>
+                  </div>
+                  <Slider
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={[prior2]}
+                    onValueChange={(v) => setPrior2(v[0])}
+                    className="py-0.5 cursor-pointer"
+                  />
+                </div>
+
+                {/* Effective rainfall display & note */}
+                <div className="pt-1.5 border-t border-border/40 text-[11px] space-y-0.5">
+                  <div className="text-foreground">
+                    Effective rainfall: <b className="font-mono text-primary font-bold">{effective} mm</b>{" "}
+                    <span className="text-[10px] text-muted-foreground">(today + weighted prior days)</span>
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">
+                    Weights prototype hain, calibrated nahi.
+                  </div>
+                </div>
+              </div>
 
               {/* Quick Hackathon Demo Presets */}
               <div className="pt-1">
@@ -269,9 +393,13 @@ export default function App() {
                   {DEMO_PRESETS.map((p) => (
                     <button
                       key={p.rain}
-                      onClick={() => setSlider(p.rain)}
+                      onClick={() => {
+                        setSlider(p.rain);
+                        setPrior1(0);
+                        setPrior2(0);
+                      }}
                       className={`flex flex-col items-start rounded-lg border p-2 text-left transition-all hover:bg-muted/80 active:scale-[0.98] ${
-                        slider === p.rain
+                        slider === p.rain && !hasPriorRain
                           ? "border-primary bg-primary/5 ring-1 ring-primary/40 font-semibold"
                           : "border-border/60 bg-background/50"
                       }`}
@@ -279,9 +407,11 @@ export default function App() {
                       <div className="flex w-full items-center justify-between text-xs">
                         <span>{p.label}</span>
                       </div>
-                      <span className="text-[10px] text-muted-foreground line-clamp-1">
-                        {p.desc}
-                      </span>
+                      {!hasPriorRain && (
+                        <span className="text-[10px] text-muted-foreground line-clamp-1">
+                          {p.desc}
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -537,8 +667,10 @@ export default function App() {
 
         {/* Right Map Canvas */}
         <main
-          className={`relative flex-1 h-full w-full ${
-            mobileTab === "map" ? "flex" : "hidden md:flex"
+          className={`flex-1 h-full w-full ${
+            mobileTab === "map"
+              ? "relative block"
+              : "max-md:invisible max-md:pointer-events-none max-md:absolute max-md:inset-0 block md:relative"
           }`}
         >
           <MapContainer
@@ -554,9 +686,8 @@ export default function App() {
             />
 
             <MapController
-              center={RUDRAPRAYAG_CENTER}
-              zoom={RUDRAPRAYAG_ZOOM}
               selectedCoord={selectedCoord}
+              mobileTab={mobileTab}
             />
 
             {/* Road Network Polylines (Real Curvy Mountain Road Geometry) */}
@@ -575,7 +706,7 @@ export default function App() {
                   <div className="text-xs p-1 space-y-0.5">
                     <div className="flex items-center gap-1.5 font-bold">
                       <span className="font-mono">{e.id}</span>: {e.from} ➔ {e.to} ({e.length_km} km)
-                      {e.geometry_source === "approximated" ? (
+                      {e.geometry_source?.startsWith("approximated") ? (
                         <span className="text-[9px] font-normal px-1 py-0.2 rounded bg-amber-500/15 text-amber-700 border border-amber-500/30">
                           approximate path
                         </span>
@@ -588,7 +719,7 @@ export default function App() {
                     <div>Risk Score: <b>{e.risk}</b> {e.blocked ? "⛔ BLOCKED" : "✅ PASSABLE"}</div>
                     {e.mean_gradient_pct && (
                       <div className="text-[10px] text-muted-foreground">
-                        Mean slope: {e.mean_gradient_pct}% {e.geometry_source === "approximated" ? "(approximate)" : ""} (Max: {e.max_gradient_pct}% {e.geometry_source === "approximated" ? "approx." : ""})
+                        Mean slope: {e.mean_gradient_pct}% {e.geometry_source?.startsWith("approximated") ? "(approximate)" : ""} (Max: {e.max_gradient_pct}% {e.geometry_source?.startsWith("approximated") ? "approx." : ""})
                       </div>
                     )}
                     {e.susceptibility_source === "manual_expert_override" && (
