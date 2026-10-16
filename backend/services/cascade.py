@@ -24,13 +24,13 @@ def get_sample_data():
     return villages, hospitals
 
 
-def run_cascade_simulation(rainfall_mm: float = 80.0):
+def run_cascade_simulation(rainfall_mm: float = 80.0, edge_rainfalls: dict | None = None):
     """
     Graph-based cascade: rainfall -> road risk -> blocked roads ->
     villages jinke paas kisi hospital tak path nahi bacha = isolated.
     """
     villages, _ = get_sample_data()
-    isolation, blocked_roads = compute_isolation(rainfall_mm)
+    isolation, blocked_roads = compute_isolation(rainfall_mm, edge_rainfalls=edge_rainfalls)
 
     isolation_details = []
     isolated_count = 0
@@ -63,12 +63,12 @@ def run_cascade_simulation(rainfall_mm: float = 80.0):
         "message": f"Simulation completed for {rainfall_mm}mm rainfall in Rudraprayag"
     }
 
-def prioritize_resources(rainfall_mm: float = 80.0):
+def prioritize_resources(rainfall_mm: float = 80.0, edge_rainfalls: dict | None = None):
     """
     Limited resources ko sirf genuinely isolated villages pe assign karta hai.
     Resources: 2 Ambulances, 2 Rescue Teams, 1 Excavator
     """
-    simulation = run_cascade_simulation(rainfall_mm)
+    simulation = run_cascade_simulation(rainfall_mm, edge_rainfalls=edge_rainfalls)
     villages = simulation["isolation_details"]
     
     # Sirf tabhi assign karo jab village isolated ho

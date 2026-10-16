@@ -1,0 +1,93 @@
+{
+  "metadata": {
+    "title": "Emergency Resource Depots - Rudraprayag District",
+    "disclaimer": "SAMPLE - replace with DDMA data (District Disaster Management Authority, Rudraprayag)",
+    "description": "Configurable depot inventory for ambulances, SDRF/NDRF rescue teams, PWD/BRO heavy machinery, and medical field units."
+  },
+  "depots": [
+    {
+      "id": "DEPOT_H01_RUDRA",
+      "name": "District Hospital Base Rudraprayag",
+      "type": "hospital_ambulance_base",
+      "nearest_node": "H01",
+      "lat": 30.2844,
+      "lon": 78.9811,
+      "resources": {
+        "ambulance": 6,
+        "medical_team": 3,
+        "rescue_team": 1,
+        "excavator": 0
+      }
+    },
+    {
+      "id": "DEPOT_H02_UKHI",
+      "name": "CHC Ukhimath Ambulance Post",
+      "type": "hospital_ambulance_base",
+      "nearest_node": "H02",
+      "lat": 30.5170,
+      "lon": 79.0900,
+      "resources": {
+        "ambulance": 3,
+        "medical_team": 2,
+        "rescue_team": 0,
+        "excavator": 0
+      }
+    },
+    {
+      "id": "DEPOT_H03_GUPT",
+      "name": "PHC Guptkashi Emergency Post",
+      "type": "hospital_ambulance_base",
+      "nearest_node": "H03",
+      "lat": 30.5260,
+      "lon": 79.0700,
+      "resources": {
+        "ambulance": 3,
+        "medical_team": 2,
+        "rescue_team": 0,
+        "excavator": 0
+      }
+    },
+    {
+      "id": "DEPOT_SDRF_AGM",
+      "name": "SDRF / Police Rescue Base Augustmuni",
+      "type": "sdrf_ndrf_base",
+      "nearest_node": "V01",
+      "lat": 30.3900,
+      "lon": 79.0230,
+      "resources": {
+        "ambulance": 2,
+        "medical_team": 1,
+        "rescue_team": 5,
+        "excavator": 1
+      }
+    },
+    {
+      "id": "DEPOT_BRO_GUPT",
+      "name": "PWD / BRO Equipment Yard Guptkashi",
+      "type": "pwd_bro_machinery_depot",
+      "nearest_node": "V03",
+      "lat": 30.5260,
+      "lon": 79.0700,
+      "resources": {
+        "ambulance": 0,
+        "medical_team": 0,
+        "rescue_team": 1,
+        "excavator": 4
+      }
+    },
+    {
+      "id": "DEPOT_DEOC_RUDRA",
+      "name": "DEOC Central Disaster Depot Rudraprayag",
+      "type": "sdrf_ndrf_base",
+      "nearest_node": "H01",
+      "lat": 30.2844,
+      "lon": 78.9811,
+      "resources": {
+        "ambulance": 4,
+        "medical_team": 2,
+        "rescue_team": 4,
+        "excavator": 2
+      }
+    }
+  ]
+}

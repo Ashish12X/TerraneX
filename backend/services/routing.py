@@ -13,7 +13,7 @@ def load_network():
         return json.load(f)
 
 
-def build_graph(rainfall_mm: float):
+def build_graph(rainfall_mm: float, edge_rainfalls: dict | None = None):
     """
     Returns (full_graph, usable_graph).
     full_graph  : saari roads (blocked bhi), risk/blocked attributes ke saath
@@ -26,13 +26,15 @@ def build_graph(rainfall_mm: float):
         full.add_node(n["id"], name=n["name"], type=n["type"], lat=n.get("lat"), lon=n.get("lon"))
 
     for e in data["edges"]:
-        risk = get_edge_risk(e["susceptibility"], rainfall_mm)
+        rf = edge_rainfalls.get(e["id"], rainfall_mm) if edge_rainfalls else rainfall_mm
+        risk = get_edge_risk(e["susceptibility"], rf)
         full.add_edge(
             e["from"], e["to"],
             id=e["id"],
             length_km=e["length_km"],
             risk=risk,
             blocked=is_blocked(risk),
+            rainfall_mm=rf,
             # risky roads ki cost badhti hai -> router safer road prefer karta hai
             cost=e["length_km"] * (1 + 3 * risk),
             coordinates=e.get("coordinates", []),
@@ -86,9 +88,9 @@ def nearest_hospital_route(usable, source):
     return paths[best], len(reachable)
 
 
-def compute_isolation(rainfall_mm: float):
+def compute_isolation(rainfall_mm: float, edge_rainfalls: dict | None = None):
     """Har village ke liye: hospital tak path hai ya nahi."""
-    full, usable = build_graph(rainfall_mm)
+    full, usable = build_graph(rainfall_mm, edge_rainfalls=edge_rainfalls)
     results = {}
 
     for node_id, d in full.nodes(data=True):
@@ -107,9 +109,9 @@ def compute_isolation(rainfall_mm: float):
     return results, blocked_count
 
 
-def get_safe_route(source_id: str, rainfall_mm: float, target_id: str | None = None):
+def get_safe_route(source_id: str, rainfall_mm: float, target_id: str | None = None, edge_rainfalls: dict | None = None):
     """Safe route + normal (shortest) route ka comparison."""
-    full, usable = build_graph(rainfall_mm)
+    full, usable = build_graph(rainfall_mm, edge_rainfalls=edge_rainfalls)
 
     if source_id not in full:
         raise ValueError(f"Unknown source: {source_id}")
@@ -147,10 +149,10 @@ def get_safe_route(source_id: str, rainfall_mm: float, target_id: str | None = N
         "rerouted": path != normal_path,
     }
 
-def get_network_state(rainfall_mm: float):
+def get_network_state(rainfall_mm: float, edge_rainfalls: dict | None = None):
     """Map ke liye: nodes (coordinates + isolated flag) aur roads (risk + blocked)."""
     data = load_network()
-    isolation, blocked_count = compute_isolation(rainfall_mm)
+    isolation, blocked_count = compute_isolation(rainfall_mm, edge_rainfalls=edge_rainfalls)
 
     nodes = []
     for n in data["nodes"]:
@@ -161,8 +163,9 @@ def get_network_state(rainfall_mm: float):
 
     edges = []
     for e in data["edges"]:
-        risk = get_edge_risk(e["susceptibility"], rainfall_mm)
-        edges.append({**e, "risk": risk, "blocked": is_blocked(risk)})
+        rf = edge_rainfalls.get(e["id"], rainfall_mm) if edge_rainfalls else rainfall_mm
+        risk = get_edge_risk(e["susceptibility"], rf)
+        edges.append({**e, "risk": risk, "blocked": is_blocked(risk), "rainfall_mm": rf})
 
     return {"rainfall_mm": rainfall_mm, "blocked_roads": blocked_count,
             "nodes": nodes, "edges": edges}

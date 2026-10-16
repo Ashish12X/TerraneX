@@ -11,8 +11,7 @@ Honest, transparent, and direct responses to common technical questions from hac
 ---
 
 ### 2. ML model kyun nahi hai?
-- Abhi training data nahi hai (landslide inventory ISRO/GSI se milne par). Isliye rule-based aur terrain ranking use kiya.
-- Data aane par `models/risk_model.py` mein ML plug hoga. Road connectivity ka cascade graph (NetworkX) deterministic hi rahega, par har road ka block hona ML predict karega.
+- Abhi landslide inventory training data nahi hai, isliye rule-based + terrain ranking. Data milne par risk_model.py mein ML plug hoga.
 
 ---
 
@@ -23,8 +22,7 @@ Honest, transparent, and direct responses to common technical questions from hac
 ---
 
 ### 4. E09 ki susceptibility manual kyun hai?
-- E09 trek corridor ko landslide-prone maan ke manually 0.88 rakha.
-- Ye expert judgment hai, DEM se nahi nikla. Real inventory data se replace hoga.
+- E09 ko landslide-prone trek corridor maan ke manually 0.88 rakha. Ye expert judgment hai, DEM se nahi nikla.
 
 ---
 
