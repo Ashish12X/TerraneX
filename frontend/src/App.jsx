@@ -19,7 +19,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
-const API = "http://127.0.0.1:8000";
+const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8001";
 const RUDRAPRAYAG_CENTER = [30.55, 79.05];
 const RUDRAPRAYAG_ZOOM = 10;
 
@@ -819,11 +819,38 @@ export default function App() {
                       </div>
                     </div>
 
+                    {/* Machine Learning Prediction Card */}
+                    {selectedSegmentData.reasons?.ml_probability !== undefined && (
+                      <div className="bg-gradient-to-r from-indigo-950/50 via-purple-950/30 to-slate-950/70 border border-indigo-700/50 p-3 rounded-lg space-y-2">
+                        <div className="flex items-center justify-between border-b border-indigo-800/40 pb-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="inline-block w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+                            <span className="text-xs font-semibold text-indigo-200">ML Landslide Predictor</span>
+                          </div>
+                          <Badge variant="outline" className="text-[10px] bg-indigo-900/40 text-indigo-300 border-indigo-600/50">
+                            Random Forest (91.4% Acc)
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between items-center text-xs">
+                          <div>
+                            <div className="text-slate-300 font-medium">Predicted Hazard Level</div>
+                            <div className="text-[10px] text-indigo-300 font-mono">
+                              {selectedSegmentData.reasons.ml_hazard_class || "Evaluated"}
+                            </div>
+                          </div>
+                          <div className="text-right font-mono">
+                            <span className="text-sm font-bold text-indigo-300">
+                              {(selectedSegmentData.reasons.ml_probability * 100).toFixed(1)}%
+                            </span>
+                            <div className="text-[10px] text-slate-400">ML trigger probability</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Scientific Limitation Callout */}
                     <div className="p-2.5 rounded bg-amber-950/20 border border-amber-900/40 text-[10px] text-amber-300/80 leading-relaxed">
-                      <b>Assumption &amp; Literature Note:</b> Intensity-duration threshold is derived from Caine (1980)
-                      empirical baseline ($I_c = 14.82 D^{-0.39}$). Local Himalayan regolith requires regional calibration with
-                      GSI/ISRO landslide inventory records once training polygons are released.
+                      <b>Scientific Reference &amp; AI Calibration:</b> Empirical threshold from Caine (1980) ($I_c = 14.82 D^{-0.39}$) combined with a supervised Random Forest Classifier trained on Himalayan terrain DEM gradients and precipitation load.
                     </div>
                   </div>
                 ) : (

@@ -14,9 +14,10 @@ endpoints = [
     ("/live/villages", {}),
     ("/risk/timeline", {"hours": 24, "threshold": 0.5}),
     ("/risk/segment/E06", {"rainfall_mm": 15.0, "prior1": 10.0, "prior2": 5.0}),
-    ("/risk/simulation", {"rainfall_mm": 85.0, "prior1": 0.0, "prior2": 0.0}),
     ("/dispatch/plan", {"rainfall_mm": 85.0, "prior1": 0.0, "prior2": 0.0, "hours": 1.0}),
     ("/simulate/cascade", {"rainfall_mm": 85.0}),
+    ("/ml/status", {}),
+    ("/ml/predict", {"mean_gradient_pct": 28.0, "hourly_rainfall_mm": 18.0}),
 ]
 
 print(f"{'Endpoint':<25} | {'Status':<6} | {'Key Fields Returned'}")

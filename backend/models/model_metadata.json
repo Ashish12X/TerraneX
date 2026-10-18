@@ -1,0 +1,36 @@
+{
+  "model_name": "Terranex-Himalayan-Landslide-RF",
+  "algorithm": "RandomForestClassifier (Ensemble Decision Trees)",
+  "framework": "scikit-learn",
+  "trained_at": "2026-10-18 20:01:56 UTC",
+  "target_region": "Rudraprayag District, Garhwal Himalayas",
+  "sample_count": 4000,
+  "features": [
+    "mean_gradient_pct",
+    "max_gradient_pct",
+    "hourly_rainfall_mm",
+    "caine_threshold_mm_hr",
+    "caine_ratio",
+    "antecedent_72h_mm",
+    "elevation_m",
+    "geotechnical_susc"
+  ],
+  "metrics": {
+    "accuracy": 0.9137,
+    "roc_auc": 0.973,
+    "precision": 0.9324,
+    "recall": 0.9306,
+    "f1_score": 0.9315
+  },
+  "feature_importances": {
+    "hourly_rainfall_mm": 0.2349,
+    "caine_ratio": 0.1978,
+    "mean_gradient_pct": 0.1886,
+    "max_gradient_pct": 0.1784,
+    "geotechnical_susc": 0.0929,
+    "antecedent_72h_mm": 0.0724,
+    "elevation_m": 0.0351,
+    "caine_threshold_mm_hr": 0.0
+  },
+  "citation": "Calibrated with empirical Caine (1980) I-D thresholds & Himalayan terrain DEM gradients"
+}

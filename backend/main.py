@@ -14,13 +14,15 @@ from models.risk_model import (
     compute_isolated_settlements,
     DEFAULT_BLOCK_THRESHOLD,
     get_caine_critical_intensity,
+    get_ml_status,
+    predict_ml_probability,
 )
 from services.dispatch import generate_dispatch_plan
 
 app = FastAPI(
     title="Terranex API",
-    description="Adaptive Landslide Intelligence & Emergency Response System",
-    version="0.1.0"
+    description="Adaptive Landslide Intelligence & Emergency Response System with Machine Learning",
+    version="0.2.0"
 )
 
 app.add_middleware(
@@ -33,16 +35,69 @@ app.add_middleware(
 
 @app.get("/")
 def home():
+    ml_info = get_ml_status()
     return {
         "message": "Terranex API is running",
         "project": "Terranex",
         "study_area": "Rudraprayag, Uttarakhand",
-        "status": "Backend + Cascade Simulation Ready"
+        "status": "Backend + Cascade Simulation + ML Model Ready",
+        "ml_model_loaded": ml_info.get("loaded", False),
+        "ml_algorithm": ml_info.get("algorithm", "RandomForestClassifier")
     }
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    ml_info = get_ml_status()
+    return {
+        "status": "ok",
+        "ml_model_status": "ready" if ml_info.get("loaded") else "unavailable"
+    }
+
+@app.get("/ml/status")
+def ml_model_status():
+    """
+    Returns the trained ML model architecture, evaluation metrics (Accuracy, ROC-AUC),
+    feature importances, and training metadata.
+    """
+    return get_ml_status()
+
+@app.get("/ml/predict")
+def ml_predict_corridor(
+    mean_gradient_pct: float = 24.5,
+    max_gradient_pct: float = 38.0,
+    hourly_rainfall_mm: float = 18.5,
+    duration_hours: float = 1.0,
+    antecedent_72h_mm: float = 35.0,
+    elevation_m: float = 1500.0,
+    geotech_susc: float = 0.45
+):
+    """
+    Direct ML Landslide Susceptibility inference using scikit-learn RandomForestClassifier.
+    """
+    caine_thresh = get_caine_critical_intensity(duration_hours)
+    res = predict_ml_probability(
+        mean_gradient_pct=mean_gradient_pct,
+        max_gradient_pct=max_gradient_pct,
+        hourly_rainfall_mm=hourly_rainfall_mm,
+        caine_thresh=caine_thresh,
+        antecedent_72h_mm=antecedent_72h_mm,
+        elevation_m=elevation_m,
+        geotech_susc=geotech_susc
+    )
+    return {
+        "input_features": {
+            "mean_gradient_pct": mean_gradient_pct,
+            "max_gradient_pct": max_gradient_pct,
+            "hourly_rainfall_mm": hourly_rainfall_mm,
+            "duration_hours": duration_hours,
+            "caine_threshold_mm_hr": caine_thresh,
+            "caine_ratio": round(hourly_rainfall_mm / caine_thresh, 3) if caine_thresh > 0 else 0.0,
+            "antecedent_72h_mm": antecedent_72h_mm,
+            "elevation_m": elevation_m,
+            "geotech_susc": geotech_susc
+        },
+        "ml_inference": res
+    }
 
 @app.get("/simulate/cascade")
 def cascade(
