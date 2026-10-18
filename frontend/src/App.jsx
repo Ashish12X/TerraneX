@@ -19,7 +19,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
-const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8001";
+const API = (import.meta.env.VITE_API_URL || "https://terranex-backend.onrender.com").replace(/\/$/, "");
 const RUDRAPRAYAG_CENTER = [30.55, 79.05];
 const RUDRAPRAYAG_ZOOM = 10;
 
