@@ -15,18 +15,20 @@ import {
 import { api } from "../services/api";
 
 // ── Sketch Slider ─────────────────────────────────────────────────────────────
-function SketchSlider({ label, value, min, max, step = 1, onChange, unit = "", colorClass = "bg-sky-400", rangeClass = "range-blue" }) {
+function SketchSlider({ label, value, min, max, step = 1, onChange, unit = "", colorClass = "bg-sky-400", rangeClass = "range-blue", isDark = false }) {
   const pct = ((value - min) / (max - min)) * 100;
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-600">{label}</span>
-        <span className="font-mono text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-lg">
+        <span className={`text-xs font-medium ${isDark ? "text-slate-300" : "text-slate-600"}`}>{label}</span>
+        <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded-lg ${
+          isDark ? "text-slate-100 bg-white/[0.08]" : "text-slate-800 bg-slate-100"
+        }`}>
           {value}{unit}
         </span>
       </div>
       <div className="relative">
-        <div className="h-[5px] bg-slate-200 rounded-full overflow-hidden">
+        <div className={`h-[5px] rounded-full overflow-hidden ${isDark ? "bg-white/[0.1]" : "bg-slate-200"}`}>
           <div
             className={`h-full rounded-full transition-all ${colorClass}`}
             style={{ width: `${pct}%` }}
@@ -44,7 +46,9 @@ function SketchSlider({ label, value, min, max, step = 1, onChange, unit = "", c
         />
         {/* Visible thumb */}
         <div
-          className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-sky-400 shadow-sm pointer-events-none transition-all"
+          className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 shadow-sm pointer-events-none transition-all ${
+            isDark ? "bg-[#0a0f1a] border-sky-400" : "bg-white border-sky-400"
+          }`}
           style={{ left: `calc(${pct}% - 8px)` }}
         />
       </div>
@@ -53,21 +57,35 @@ function SketchSlider({ label, value, min, max, step = 1, onChange, unit = "", c
 }
 
 // ── Scenario Preset Card ──────────────────────────────────────────────────────
-function ScenarioCard({ icon: Icon, label, desc, colorClass, borderClass, onClick, active }) {
+function ScenarioCard({ icon: Icon, label, desc, colorClass, borderClass, onClick, active, isDark = false }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left p-4 rounded-2xl border-2 transition-all duration-150 group
-        ${borderClass} ${colorClass}
-        ${active ? "ring-2 ring-offset-1 ring-slate-400 shadow-md" : "hover:shadow-sm hover:scale-[1.01]"}`}
+      className={`w-full text-left p-4 rounded-2xl border-2 transition-all duration-150 group cursor-pointer ${
+        isDark
+          ? active
+            ? "bg-[#1e293b] border-sky-400 ring-2 ring-sky-400/30 shadow-lg text-white"
+            : "bg-[#111827] border-white/10 hover:border-white/20 text-slate-100 hover:bg-[#152033]"
+          : `${borderClass} ${colorClass} ${
+              active
+                ? "ring-2 ring-offset-1 ring-slate-400 shadow-md"
+                : "hover:shadow-sm hover:scale-[1.01]"
+            }`
+      }`}
     >
       <div className="flex items-start gap-3">
-        <div className="p-2 bg-white/70 rounded-xl border border-white/60">
-          <Icon className="w-5 h-5 text-slate-700" strokeWidth={1.6} />
+        <div className={`p-2 rounded-xl border ${
+          isDark ? "bg-white/[0.08] border-white/10 text-white" : "bg-white/70 border-white/60 text-slate-700"
+        }`}>
+          <Icon className="w-5 h-5" strokeWidth={1.6} />
         </div>
         <div>
-          <div className="font-sketch text-base font-bold text-slate-800 leading-tight">{label}</div>
-          <div className="text-xs text-slate-500 mt-0.5 leading-relaxed">{desc}</div>
+          <div className={`font-sketch text-base font-bold leading-tight ${isDark ? "text-white" : "text-slate-800"}`}>
+            {label}
+          </div>
+          <div className={`text-xs mt-0.5 leading-relaxed ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+            {desc}
+          </div>
         </div>
       </div>
     </button>
@@ -78,9 +96,9 @@ function ScenarioCard({ icon: Icon, label, desc, colorClass, borderClass, onClic
 function RiskBadge({ risk }) {
   if (risk == null) return <span className="sk-pill bg-slate-100 text-slate-400 border-slate-200">—</span>;
   const pct = (risk * 100).toFixed(0);
-  if (risk >= 0.7) return <span className="sk-pill bg-red-100 text-red-700 border-red-300">{pct}% CRITICAL</span>;
-  if (risk >= 0.4) return <span className="sk-pill bg-amber-100 text-amber-700 border-amber-300">{pct}% ELEVATED</span>;
-  return <span className="sk-pill bg-green-100 text-green-700 border-green-300">{pct}% SAFE</span>;
+  if (risk >= 0.7) return <span className="sk-pill bg-red-100 text-red-700 border-red-300 font-bold">{pct}% CRITICAL</span>;
+  if (risk >= 0.4) return <span className="sk-pill bg-amber-100 text-amber-700 border-amber-300 font-bold">{pct}% ELEVATED</span>;
+  return <span className="sk-pill bg-green-100 text-green-700 border-green-300 font-bold">{pct}% SAFE</span>;
 }
 
 // ── Main Component ────────────────────────────────────────────────────────────
@@ -90,10 +108,17 @@ export function SimulationStudioPage({
   simPrior2, setSimPrior2,
   simThreshold, setSimThreshold,
   onNavigate,
+  isDark = false,
 }) {
   const [simulationData, setSimulationData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [activePreset, setActivePreset] = useState(null);
+
+  const card = isDark ? "bg-[#111827] border border-white/[0.07] rounded-2xl" : "sk-card";
+  const txtP = isDark ? "text-slate-100" : "text-slate-900";
+  const txtM = isDark ? "text-slate-400" : "text-slate-500";
+  const btnPri = isDark ? "bg-white text-slate-900 hover:bg-slate-100" : "bg-slate-900 text-white hover:bg-slate-700";
+  const btnSec = isDark ? "bg-[#111827] text-slate-300 border-white/10 hover:bg-[#1f293d]" : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50";
 
   useEffect(() => {
     setLoading(true);
@@ -118,7 +143,10 @@ export function SimulationStudioPage({
   const overallRisk = simulationData?.overall_risk;
 
   return (
-    <div className="sk-page min-h-screen p-5 lg:p-8">
+    <div
+      className={isDark ? "min-h-screen p-5 lg:p-8" : "sk-page min-h-screen p-5 lg:p-8"}
+      style={isDark ? { background: '#0a0f1a', color: '#f1f5f9' } : {}}
+    >
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* ── HEADER ────────────────────────────────────────────────── */}
@@ -126,12 +154,12 @@ export function SimulationStudioPage({
           <div>
             <div className="sk-section-label">
               <SlidersHorizontal className="w-3.5 h-3.5" />
-              Crisis Simulator · Scenario Modelling
+              <span className={txtM}>Crisis Simulator · Scenario Modelling</span>
             </div>
-            <h1 className="font-sketch text-4xl lg:text-5xl font-bold text-slate-900 leading-tight">
+            <h1 className={`font-sketch text-4xl lg:text-5xl font-bold leading-tight ${txtP}`}>
               Simulation Studio
             </h1>
-            <p className="text-sm text-slate-500 mt-2 max-w-xl">
+            <p className={`text-sm mt-2 max-w-xl ${txtM}`}>
               Adjust environmental parameters to preview cascading network failure
               across all 9 Rudraprayag road corridors.
             </p>
@@ -140,14 +168,14 @@ export function SimulationStudioPage({
           <div className="flex items-center gap-2">
             <button
               onClick={() => { setSimRain(80); setSimPrior1(20); setSimPrior2(15); setSimThreshold(0.5); setActivePreset(null); }}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all"
+              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium border rounded-xl transition-all cursor-pointer ${btnSec}`}
             >
               <RotateCcw className="w-3.5 h-3.5" />
               Reset
             </button>
             <button
               onClick={() => onNavigate("command")}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-slate-900 rounded-xl hover:bg-slate-700 transition-all"
+              className={`flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer ${btnPri}`}
             >
               <Compass className="w-3.5 h-3.5" />
               View Live Map
