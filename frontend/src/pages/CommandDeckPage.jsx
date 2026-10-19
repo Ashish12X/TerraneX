@@ -182,45 +182,46 @@ export function CommandDeckPage({
       : `${simRain} mm/hr (Sim load)`;
 
   return (
-    <div className="relative w-full h-[calc(100vh-4rem)] bg-[#050811] overflow-hidden flex flex-col font-sans select-none">
-      {/* 1. FLOATING TOP HUD STATUS RIBBON (Apple / Linear Minimal Caliber) */}
+    <div className="relative w-full h-[calc(100vh-4rem)] bg-[#060a14] overflow-hidden flex flex-col select-none">
+      {/* 1. FLOATING TOP HUD STATUS RIBBON */}
       <div className="absolute top-4 left-4 right-4 z-20 pointer-events-none flex items-center justify-between gap-3">
         {/* Left Stats Cluster */}
-        <div className="pointer-events-auto flex items-center gap-2 bg-slate-950/80 backdrop-blur-xl border border-white/10 p-1.5 rounded-2xl shadow-2xl">
-          <div className="px-3 py-1.5 rounded-xl bg-white/[0.05] border border-white/5 flex flex-col">
-            <span className="text-[9px] font-mono uppercase tracking-wider text-slate-400">
+        <div className="pointer-events-auto flex items-center gap-1.5 bg-[#0a0f1e]/90 backdrop-blur-xl border border-white/[0.09] p-1.5 rounded-2xl shadow-2xl">
+          <div className="px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.06] flex flex-col gap-0.5">
+            <span className="text-[9px] font-mono uppercase tracking-wider text-slate-500">
               {mode === "live" ? "Forecast Precip" : "Simulated Precip"}
             </span>
             <span className="text-xs font-bold text-white font-mono flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
               {activeRainfallDisplay}
             </span>
           </div>
 
-          <div className="px-3 py-1.5 rounded-xl bg-white/[0.05] border border-white/5 flex flex-col">
-            <span className="text-[9px] font-mono uppercase tracking-wider text-slate-400">Severed Roads</span>
-            <span className="text-xs font-bold text-red-400 font-mono flex items-center gap-1.5">
+          <div className="px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.06] flex flex-col gap-0.5">
+            <span className="text-[9px] font-mono uppercase tracking-wider text-slate-500">Severed Roads</span>
+            <span className="text-xs font-bold font-mono flex items-center gap-1.5"
+              style={{ color: activeBlockedCount > 0 ? '#f87171' : '#6ee7b7' }}>
               {activeBlockedCount} Corridors
               {activeBlockedCount > 0 && (
-                <span className="text-[9px] px-1 py-0.2 rounded bg-red-950 border border-red-800 text-red-300 font-mono">
+                <span className="text-[9px] px-1.5 py-px rounded-md bg-red-950/80 border border-red-700/50 text-red-300 font-mono">
                   ALERT
                 </span>
               )}
             </span>
           </div>
 
-          <div className="hidden sm:flex px-3 py-1.5 rounded-xl bg-white/[0.05] border border-white/5 flex-col">
-            <span className="text-[9px] font-mono uppercase tracking-wider text-slate-400">Isolated Population</span>
+          <div className="hidden sm:flex px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.06] flex-col gap-0.5">
+            <span className="text-[9px] font-mono uppercase tracking-wider text-slate-500">Isolated Population</span>
             <span className="text-xs font-bold text-amber-300 font-mono">
               {activeIsolatedPop.toLocaleString()}{" "}
-              <span className="text-[10px] text-slate-400 font-normal">in {activeCutoffCount} villages</span>
+              <span className="text-[10px] text-slate-500 font-normal">/ {activeCutoffCount} villages</span>
             </span>
           </div>
 
-          <div className="hidden md:flex px-3 py-1.5 rounded-xl bg-white/[0.05] border border-white/5 flex-col">
-            <span className="text-[9px] font-mono uppercase tracking-wider text-slate-400">Staging Depots</span>
+          <div className="hidden md:flex px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.06] flex-col gap-0.5">
+            <span className="text-[9px] font-mono uppercase tracking-wider text-slate-500">Staging Depots</span>
             <span className="text-xs font-bold text-cyan-300 font-mono">
-              {depots.length} Bases <span className="text-[10px] text-slate-400 font-normal">Active</span>
+              {depots.length} Bases <span className="text-[10px] text-slate-500 font-normal">Active</span>
             </span>
           </div>
         </div>
@@ -404,23 +405,25 @@ export function CommandDeckPage({
 
         {/* FLOATING CONTEXTUAL INSPECTION DRAWER (Right Slide-over) */}
         {drawerOpen && selectedSegmentData && (
-          <div className="absolute top-4 right-4 bottom-24 w-80 sm:w-96 z-20 glass-panel rounded-2xl shadow-2xl p-5 flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-300">
-            <div className="space-y-4">
-              <div className="flex justify-between items-start border-b border-white/[0.08] pb-3">
+          <div className="absolute top-4 right-4 bottom-24 w-80 sm:w-88 z-20 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300"
+            style={{ background: 'rgba(8,13,27,0.92)', backdropFilter: 'blur(18px)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+              {/* Header */}
+              <div className="flex justify-between items-start pb-3 border-b border-white/[0.08]">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="font-mono text-[10px] px-2 py-0.5 rounded-lg bg-cyan-500/15 text-cyan-400 border border-cyan-500/25">
                       {selectedSegmentId}
                     </span>
-                    <h3 className="font-bold text-white text-sm">{selectedSegmentData.name}</h3>
+                    <h3 className="font-bold text-white text-sm leading-tight">{selectedSegmentData.name}</h3>
                   </div>
-                  <span className="text-[11px] text-slate-400 font-mono mt-0.5 block">
-                    {selectedSegmentData.length_km} km • {selectedSegmentData.road_class}
+                  <span className="text-[11px] text-slate-500 font-mono">
+                    {selectedSegmentData.length_km} km · {selectedSegmentData.road_class}
                   </span>
                 </div>
                 <button
                   onClick={() => setDrawerOpen(false)}
-                  className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5 cursor-pointer"
+                  className="text-slate-500 hover:text-white p-1.5 rounded-lg hover:bg-white/[0.06] cursor-pointer transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -429,90 +432,75 @@ export function CommandDeckPage({
               {/* Probability Gauge */}
               <div className="space-y-2">
                 <div className="flex justify-between items-baseline">
-                  <span className="text-xs text-slate-400">Failure Probability</span>
+                  <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">Failure Probability</span>
                   <span
                     className="text-2xl font-black font-mono"
-                    style={{
-                      color: getProbabilityColor(
-                        selectedSegmentData.probability,
-                        selectedSegmentData.blocked
-                      ),
-                    }}
+                    style={{ color: getProbabilityColor(selectedSegmentData.probability, selectedSegmentData.blocked) }}
                   >
                     {(selectedSegmentData.probability * 100).toFixed(1)}%
                   </span>
                 </div>
-                <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-white/5">
+                <div className="w-full bg-white/[0.05] h-2.5 rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{
                       width: `${Math.min(100, selectedSegmentData.probability * 100)}%`,
-                      backgroundColor: getProbabilityColor(
-                        selectedSegmentData.probability,
-                        selectedSegmentData.blocked
-                      ),
+                      backgroundColor: getProbabilityColor(selectedSegmentData.probability, selectedSegmentData.blocked),
                     }}
                   />
                 </div>
-                <div
-                  className={`text-[10px] font-bold font-mono px-2 py-0.5 rounded border inline-block ${
-                    getProbabilityLabel(selectedSegmentData.probability, selectedSegmentData.blocked).badgeClass
-                  }`}
-                >
+                <div className={`text-[10px] font-bold font-mono px-2 py-0.5 rounded-lg border inline-block ${
+                  getProbabilityLabel(selectedSegmentData.probability, selectedSegmentData.blocked).badgeClass}`}>
                   {getProbabilityLabel(selectedSegmentData.probability, selectedSegmentData.blocked).label}
                 </div>
               </div>
 
-              {/* Narrative Explanation */}
-              <div className="p-3 rounded-xl bg-slate-900/80 border border-white/5 space-y-1.5">
-                <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-wider">
-                  Diagnostic Reason
-                </span>
-                <p className="text-xs text-slate-200 leading-relaxed font-sans">
+              {/* Diagnostic */}
+              <div className="p-3 rounded-xl bg-white/[0.04] border border-white/[0.06] space-y-1.5">
+                <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-wider">Diagnostic</span>
+                <p className="text-xs text-slate-300 leading-relaxed">
                   {selectedSegmentData.reasons.explanation}
                 </p>
               </div>
 
-              {/* Three Drivers */}
-              <div className="space-y-2 text-xs font-mono">
-                <div className="flex justify-between py-1 border-b border-white/5">
-                  <span className="text-slate-400">Slope Steepness</span>
-                  <span className="text-white font-bold">{selectedSegmentData.reasons.slope_gradient_pct}%</span>
-                </div>
-                <div className="flex justify-between py-1 border-b border-white/5">
-                  <span className="text-slate-400">Caine Critical Ratio</span>
-                  <span className="text-cyan-300 font-bold">{selectedSegmentData.reasons.intensity_ratio}x</span>
-                </div>
-                <div className="flex justify-between py-1">
-                  <span className="text-slate-400">72h Antecedent Saturation</span>
-                  <span className="text-emerald-300 font-bold">{selectedSegmentData.reasons.antecedent_72h_mm} mm</span>
-                </div>
+              {/* Data rows */}
+              <div className="space-y-1 text-xs font-mono">
+                {[
+                  { label: "Slope Steepness", value: `${selectedSegmentData.reasons.slope_gradient_pct}%`, color: "text-white" },
+                  { label: "Caine Critical Ratio", value: `${selectedSegmentData.reasons.intensity_ratio}×`, color: "text-cyan-300" },
+                  { label: "72h Antecedent Saturation", value: `${selectedSegmentData.reasons.antecedent_72h_mm} mm`, color: "text-emerald-300" },
+                ].map((row) => (
+                  <div key={row.label} className="flex justify-between py-2 px-3 bg-white/[0.03] rounded-xl">
+                    <span className="text-slate-400">{row.label}</span>
+                    <span className={`font-bold ${row.color}`}>{row.value}</span>
+                  </div>
+                ))}
               </div>
 
-              {/* ML Model Score */}
+              {/* ML Score */}
               {selectedSegmentData.reasons?.ml_probability !== undefined && (
-                <div className="p-3 rounded-xl bg-gradient-to-r from-purple-950/40 to-slate-900 border border-purple-800/40 space-y-1">
+                <div className="p-3 rounded-xl bg-purple-950/30 border border-purple-800/30 space-y-1">
                   <div className="flex justify-between text-[10px] font-mono text-purple-300">
-                    <span>Random Forest ML (91.4% Acc)</span>
-                    <b className="text-white">{(selectedSegmentData.reasons.ml_probability * 100).toFixed(1)}% ML Risk</b>
+                    <span>Random Forest ML</span>
+                    <b className="text-white">{(selectedSegmentData.reasons.ml_probability * 100).toFixed(1)}% Risk</b>
                   </div>
                   <div className="text-[11px] text-slate-300">
-                    Classification: <b>{selectedSegmentData.reasons.ml_hazard_class}</b>
+                    Class: <b>{selectedSegmentData.reasons.ml_hazard_class}</b>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="pt-4 border-t border-white/[0.08] flex gap-2">
+            <div className="p-4 border-t border-white/[0.06] flex gap-2 shrink-0">
               <button
                 onClick={() => onNavigate("intelligence")}
-                className="flex-1 py-2 rounded-xl bg-white/[0.08] hover:bg-white/[0.12] text-xs font-bold text-slate-200 border border-white/10 transition-all cursor-pointer"
+                className="flex-1 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-xs font-bold text-slate-200 border border-white/10 transition-all cursor-pointer"
               >
                 Inspect in Lab
               </button>
               <button
                 onClick={() => onNavigate("dispatch")}
-                className="flex-1 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-xs font-bold text-slate-950 transition-all cursor-pointer"
+                className="flex-1 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-xs font-bold text-slate-950 transition-all cursor-pointer"
               >
                 View Triage
               </button>
@@ -522,7 +510,7 @@ export function CommandDeckPage({
       </div>
 
       {/* 3. FLOATING BOTTOM 24-HOUR TIMELINE SCRUBBER DECK */}
-      <div className="h-20 bg-slate-950/90 backdrop-blur-xl border-t border-white/[0.08] px-4 sm:px-6 flex items-center justify-between gap-4 z-20 shrink-0">
+      <div className="h-20 bg-[#070b18]/95 backdrop-blur-xl border-t border-white/[0.07] px-4 sm:px-6 flex items-center justify-between gap-4 z-20 shrink-0">
         {mode === "live" ? (
           <div className="flex-1 max-w-4xl mx-auto flex items-center gap-4">
             <button
