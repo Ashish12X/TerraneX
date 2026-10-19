@@ -14,6 +14,9 @@ export default function App() {
   // Operational Mode: "live" | "simulation"
   const [mode, setMode] = useState("live");
 
+  // ── THEME ──────────────────────────────────────────────────────────────────
+  const [isDark, setIsDark] = useState(false);
+
   // Core Data States
   const [network, setNetwork] = useState(null);
   const [depots, setDepots] = useState([]);
@@ -79,7 +82,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, [isPlaying]);
 
-  // 4. Dynamic Dispatch Plan (Syncs with hour in Live, or sliders in Simulation)
+  // 4. Dynamic Dispatch Plan
   useEffect(() => {
     api
       .getDispatchPlan({
@@ -111,46 +114,40 @@ export default function App() {
   // 6. Selected Segment Diagnostic Details
   useEffect(() => {
     if (!selectedSegmentId) return;
-
-    let rainVal = 0.0;
-    let p1Val = 10.0;
-    let p2Val = 5.0;
-
+    let rainVal = 0.0, p1Val = 10.0, p2Val = 5.0;
     if (mode === "live") {
       if (timelineData?.timeline && timelineData.timeline[currentHour]) {
         rainVal = timelineData.timeline[currentHour].rainfall_mm || 0.0;
       }
     } else {
-      rainVal = simRain;
-      p1Val = simPrior1;
-      p2Val = simPrior2;
+      rainVal = simRain; p1Val = simPrior1; p2Val = simPrior2;
     }
-
     api
       .getSegmentRisk(selectedSegmentId, {
-        rainfall: rainVal,
-        prior1: p1Val,
-        prior2: p2Val,
-        threshold: simThreshold,
+        rainfall: rainVal, prior1: p1Val, prior2: p2Val, threshold: simThreshold,
       })
       .then((data) => setSelectedSegmentData(data))
       .catch((err) => console.warn("Segment detail warning:", err));
   }, [selectedSegmentId, mode, currentHour, simRain, simPrior1, simPrior2, simThreshold, timelineData]);
 
+  // ── Root class for light/dark ──────────────────────────────────────────────
+  const rootClass = isDark ? "dark-mode" : "";
+
   return (
-    <div
-      className={`min-h-screen flex flex-col font-sans transition-colors duration-300 ${
-        activePage === "overview"
-          ? "bg-[#fafbfc] text-[#0f172a]"
-          : "bg-[#050811] text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200"
-      }`}
+    <div className={`min-h-screen flex flex-col transition-colors duration-300 ${rootClass}`}
+      style={{
+        background: isDark ? "#0a0f1a" : "#fafbfc",
+        color: isDark ? "#f1f5f9" : "#0f172a",
+      }}
     >
-      {/* Universal Luxury Navigation Bar */}
+      {/* Universal Navigation Bar */}
       <Navbar
         activePage={activePage}
         setActivePage={setActivePage}
         mode={mode}
         setMode={setMode}
+        isDark={isDark}
+        setIsDark={setIsDark}
         systemStatus={mlStatus}
       />
 
@@ -164,6 +161,7 @@ export default function App() {
             timelineData={timelineData}
             currentHour={currentHour}
             mlStatus={mlStatus}
+            isDark={isDark}
           />
         )}
 
@@ -191,6 +189,7 @@ export default function App() {
             setSelectedSegmentId={setSelectedSegmentId}
             selectedSegmentData={selectedSegmentData}
             onNavigate={(page) => setActivePage(page)}
+            isDark={isDark}
           />
         )}
 
@@ -198,6 +197,7 @@ export default function App() {
           <IntelligenceLabPage
             network={network}
             onNavigate={(page) => setActivePage(page)}
+            isDark={isDark}
           />
         )}
 
@@ -208,6 +208,7 @@ export default function App() {
             onNavigate={(page) => setActivePage(page)}
             mode={mode}
             setMode={setMode}
+            isDark={isDark}
           />
         )}
 
@@ -222,6 +223,7 @@ export default function App() {
             simThreshold={simThreshold}
             setSimThreshold={setSimThreshold}
             onNavigate={(page) => setActivePage(page)}
+            isDark={isDark}
           />
         )}
       </main>
