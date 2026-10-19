@@ -6,7 +6,7 @@
 
 @theme inline {
     --font-heading: var(--font-sans);
-    --font-sans: 'Figtree Variable', sans-serif;
+    --font-sans: 'Plus Jakarta Sans', 'Figtree Variable', sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -132,89 +132,151 @@
   }
 }
 
+/* ========= SKETCH DESIGN SYSTEM TOKENS ========= */
+:root {
+  --sk-bg: #fafbfc;
+  --sk-surface: #ffffff;
+  --sk-border: #e2e8f0;
+  --sk-border-dashed: #cbd5e1;
+  --sk-text-primary: #0f172a;
+  --sk-text-muted: #64748b;
+  --sk-blue: #0284c7;
+  --sk-blue-light: #e0f2fe;
+  --sk-green: #10b981;
+  --sk-green-light: #d1fae5;
+  --sk-amber: #f59e0b;
+  --sk-amber-light: #fef3c7;
+  --sk-red: #ef4444;
+  --sk-red-light: #fee2e2;
+  --sk-purple: #8b5cf6;
+  --sk-purple-light: #ede9fe;
+}
+
 .font-sketch {
   font-family: 'Kalam', 'Caveat', cursive, sans-serif;
 }
+
+/* Sketch page wrapper */
+.sk-page {
+  background: var(--sk-bg);
+  color: var(--sk-text-primary);
+  min-height: 100vh;
+}
+
+/* Sketch card base */
+.sk-card {
+  background: var(--sk-surface);
+  border: 1.5px solid var(--sk-border);
+  border-radius: 16px;
+}
+
+.sk-card-dashed {
+  background: var(--sk-surface);
+  border: 2px dashed var(--sk-border-dashed);
+  border-radius: 16px;
+}
+
+/* Scenario preset card variants */
+.sk-card-green  { border-color: #86efac; background: #f0fdf4; }
+.sk-card-amber  { border-color: #fde68a; background: #fffbeb; }
+.sk-card-red    { border-color: #fca5a5; background: #fff1f2; }
+.sk-card-purple { border-color: #c4b5fd; background: #f5f3ff; }
+
+/* Sketch section label */
+.sk-section-label {
+  font-family: 'Kalam', 'Caveat', cursive, sans-serif;
+  font-size: 13px;
+  color: var(--sk-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+/* Sketch info pill */
+.sk-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid;
+}
+
+/* Custom Scrollbar (light mode) */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
-  background-color: #050811;
-  color: #f1f5f9;
 }
 
-/* Custom Scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(51, 65, 85, 0.8);
+/* ========= SKETCH RANGE SLIDER OVERRIDES ========= */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 5px;
   border-radius: 9999px;
+  cursor: pointer;
+  outline: none;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.9);
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #0284c7;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+input[type="range"].range-green::-webkit-slider-thumb { border-color: #10b981; }
+input[type="range"].range-amber::-webkit-slider-thumb { border-color: #f59e0b; }
+input[type="range"].range-purple::-webkit-slider-thumb { border-color: #8b5cf6; }
+
+/* ========= LEAFLET CONTAINER OVERRIDES ========= */
+.leaflet-container {
+  background-color: #070a14 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+.leaflet-container img { max-width: none !important; }
+.leaflet-popup-content-wrapper {
+  background: rgba(255,255,255,0.97) !important;
+  color: #0f172a !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12) !important;
+}
+.leaflet-popup-tip { background: rgba(255,255,255,0.97) !important; }
+.custom-tooltip {
+  background: rgba(255,255,255,0.96) !important;
+  color: #0f172a !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  padding: 6px 10px !important;
+  font-family: 'Kalam', cursive !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08) !important;
 }
 
-/* Glassmorphism & Surface Utilities */
+/* ========= GLASSMORPHISM for dark Command Deck HUD ========= */
 .glass-panel {
   background: rgba(10, 15, 29, 0.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
-
 .glass-panel-subtle {
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.glass-glow-emerald {
-  box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.15);
-}
-
-.glass-glow-cyan {
-  box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.15);
-}
-
-.glass-glow-red {
-  box-shadow: 0 0 25px -5px rgba(239, 68, 68, 0.2);
-}
-
-/* Leaflet Container Overrides */
-.leaflet-container {
-  background-color: #070a14 !important;
-  font-family: 'Plus Jakarta Sans', sans-serif !important;
-}
-
-.leaflet-container img {
-  max-width: none !important;
-}
-
-.leaflet-popup-content-wrapper {
-  background: rgba(10, 15, 29, 0.95) !important;
-  color: #f8fafc !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8) !important;
-  backdrop-filter: blur(16px) !important;
-}
-
-.leaflet-popup-tip {
-  background: rgba(10, 15, 29, 0.95) !important;
-}
-
-.custom-tooltip {
-  background: rgba(10, 15, 29, 0.95) !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  border-radius: 8px !important;
-  padding: 4px 8px !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6) !important;
 }
