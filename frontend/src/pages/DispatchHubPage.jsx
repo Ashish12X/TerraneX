@@ -19,28 +19,38 @@ import {
 const DISPATCH_SKETCH = "/sketch_dispatch.jpg";
 
 // ── Small helpers ─────────────────────────────────────────────────────────────
-function KpiCard({ icon: Icon, label, value, sub, colorClass = "bg-slate-50 border-slate-200 text-slate-700" }) {
+function KpiCard({ icon: Icon, label, value, sub, colorClass, darkColorClass, isDark = false }) {
+  const activeClass = isDark
+    ? (darkColorClass || "bg-[#111827] border-white/[0.08] text-slate-200")
+    : (colorClass || "bg-slate-50 border-slate-200 text-slate-700");
+
   return (
-    <div className={`rounded-2xl border p-4 flex flex-col gap-0.5 ${colorClass}`}>
+    <div className={`rounded-2xl border p-4 flex flex-col gap-0.5 transition-colors ${activeClass}`}>
       <div className="flex items-center gap-1.5 mb-1">
-        <Icon className="w-3.5 h-3.5 opacity-60" />
-        <span className="text-[10px] font-mono uppercase tracking-wide opacity-70">{label}</span>
+        <Icon className="w-3.5 h-3.5 opacity-70" />
+        <span className={`text-[10px] font-mono uppercase tracking-wide ${isDark ? "opacity-80 text-slate-400" : "opacity-70"}`}>{label}</span>
       </div>
       <div className="text-2xl font-sketch font-bold">{value}</div>
-      {sub && <div className="text-[10px] opacity-55 font-mono">{sub}</div>}
+      {sub && <div className={`text-[10px] font-mono ${isDark ? "text-slate-400 opacity-80" : "opacity-60"}`}>{sub}</div>}
     </div>
   );
 }
 
-function OptionBadge({ letter, colorClass, title, body }) {
+function OptionBadge({ letter, colorClass, darkColorClass, title, body, isDark = false }) {
+  const activeClass = isDark
+    ? (darkColorClass || "bg-white/[0.04] border-white/10 text-slate-300")
+    : (colorClass || "bg-slate-50 border-slate-200 text-slate-700");
+
   return (
-    <div className={`flex gap-3 p-3 rounded-xl border ${colorClass}`}>
-      <div className="w-6 h-6 shrink-0 rounded-lg flex items-center justify-center text-[10px] font-mono font-black bg-white/70 border border-current">
+    <div className={`flex gap-3 p-3 rounded-xl border ${activeClass}`}>
+      <div className={`w-6 h-6 shrink-0 rounded-lg flex items-center justify-center text-[10px] font-mono font-black border border-current ${
+        isDark ? "bg-white/[0.1] text-white" : "bg-white/70 text-slate-800"
+      }`}>
         {letter}
       </div>
       <div>
-        <span className="font-semibold text-xs text-slate-800">{title} </span>
-        <span className="text-xs text-slate-500">{body}</span>
+        <span className={`font-semibold text-xs ${isDark ? "text-white" : "text-slate-800"}`}>{title} </span>
+        <span className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>{body}</span>
       </div>
     </div>
   );
@@ -146,24 +156,60 @@ export function DispatchHubPage({ dispatchPlan, depots, onNavigate, mode, setMod
 
         {/* ── KPI STRIP ───────────────────────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <KpiCard icon={AlertOctagon} label="Cut-Off Villages" value={summary.total_cut_off_settlements}
+          <KpiCard
+            icon={AlertOctagon}
+            label="Cut-Off Villages"
+            value={summary.total_cut_off_settlements}
             sub="Zero road access"
-            colorClass="bg-red-50 border-red-200 text-red-700" />
-          <KpiCard icon={Users} label="Isolated Pop." value={summary.total_isolated_population.toLocaleString()}
+            colorClass="bg-red-50 border-red-200 text-red-700"
+            darkColorClass="bg-red-950/40 border-red-800/40 text-red-300"
+            isDark={isDark}
+          />
+          <KpiCard
+            icon={Users}
+            label="Isolated Pop."
+            value={summary.total_isolated_population.toLocaleString()}
             sub="Residents trapped"
-            colorClass="bg-amber-50 border-amber-200 text-amber-700" />
-          <KpiCard icon={Activity} label="Critical Patients" value={summary.total_critical_patients}
+            colorClass="bg-amber-50 border-amber-200 text-amber-700"
+            darkColorClass="bg-amber-950/40 border-amber-800/40 text-amber-300"
+            isDark={isDark}
+          />
+          <KpiCard
+            icon={Activity}
+            label="Critical Patients"
+            value={summary.total_critical_patients}
             sub="1.5% acute rate"
-            colorClass="bg-sky-50 border-sky-200 text-sky-700" />
-          <KpiCard icon={Truck} label="Ambulances" value={summary.total_ambulances_needed}
+            colorClass="bg-sky-50 border-sky-200 text-sky-700"
+            darkColorClass="bg-sky-950/40 border-sky-800/40 text-sky-300"
+            isDark={isDark}
+          />
+          <KpiCard
+            icon={Truck}
+            label="Ambulances"
+            value={summary.total_ambulances_needed}
             sub="4 pts / unit"
-            colorClass="bg-green-50 border-green-200 text-green-700" />
-          <KpiCard icon={ShieldCheck} label="SDRF Rescue" value={summary.total_rescue_teams_needed}
+            colorClass="bg-green-50 border-green-200 text-green-700"
+            darkColorClass="bg-emerald-950/40 border-emerald-800/40 text-emerald-300"
+            isDark={isDark}
+          />
+          <KpiCard
+            icon={ShieldCheck}
+            label="SDRF Rescue"
+            value={summary.total_rescue_teams_needed}
             sub="1 team / 800 pop"
-            colorClass="bg-slate-50 border-slate-200 text-slate-700" />
-          <KpiCard icon={Plane} label="Airlifts" value={summary.aerial_evacuations_count}
+            colorClass="bg-slate-50 border-slate-200 text-slate-700"
+            darkColorClass="bg-slate-900/60 border-white/[0.08] text-slate-300"
+            isDark={isDark}
+          />
+          <KpiCard
+            icon={Plane}
+            label="Airlifts"
+            value={summary.aerial_evacuations_count}
             sub="Heli missions"
-            colorClass="bg-purple-50 border-purple-200 text-purple-700" />
+            colorClass="bg-purple-50 border-purple-200 text-purple-700"
+            darkColorClass="bg-purple-950/40 border-purple-800/40 text-purple-300"
+            isDark={isDark}
+          />
         </div>
 
         {/* ── SETTLEMENT TRIAGE CARDS ─────────────────────────────── */}
@@ -219,14 +265,21 @@ export function DispatchHubPage({ dispatchPlan, depots, onNavigate, mode, setMod
                     {/* Needs grid */}
                     <div className="grid grid-cols-3 gap-2 text-xs">
                       {[
-                        { label: "Patients", value: needs.critical_patients, color: "text-sky-600" },
-                        { label: "Ambulances", value: needs.ambulances_needed, color: "text-slate-800" },
-                        { label: "Rescue", value: needs.rescue_teams_needed, color: "text-blue-600" },
-                        { label: "Excavators", value: needs.excavator_needed, color: "text-amber-600" },
-                        { label: "Relief Kits", value: needs.relief_kits_needed, color: "text-green-600" },
+                        { label: "Patients", value: needs.critical_patients, color: isDark ? "text-sky-400" : "text-sky-600" },
+                        { label: "Ambulances", value: needs.ambulances_needed, color: isDark ? "text-slate-200" : "text-slate-800" },
+                        { label: "Rescue", value: needs.rescue_teams_needed, color: isDark ? "text-blue-400" : "text-blue-600" },
+                        { label: "Excavators", value: needs.excavator_needed, color: isDark ? "text-amber-400" : "text-amber-600" },
+                        { label: "Relief Kits", value: needs.relief_kits_needed, color: isDark ? "text-emerald-400" : "text-green-600" },
                       ].map((item) => (
-                        <div key={item.label} className="bg-slate-50 rounded-xl px-3 py-2 border border-slate-100">
-                          <div className="text-[9px] text-slate-400 font-mono uppercase">{item.label}</div>
+                        <div
+                          key={item.label}
+                          className={`rounded-xl px-3 py-2 border ${
+                            isDark ? "bg-white/[0.04] border-white/[0.06]" : "bg-slate-50 border-slate-100"
+                          }`}
+                        >
+                          <div className={`text-[9px] font-mono uppercase ${isDark ? "text-slate-400" : "text-slate-400"}`}>
+                            {item.label}
+                          </div>
                           <div className={`font-mono font-black text-sm mt-0.5 ${item.color}`}>{item.value}</div>
                         </div>
                       ))}
@@ -243,12 +296,12 @@ export function DispatchHubPage({ dispatchPlan, depots, onNavigate, mode, setMod
                           </div>
                           <div className={`font-semibold mb-1 ${txtP}`}>→ {evac.primary_hospital}</div>
                           {isAerial ? (
-                            <div className="text-slate-500 leading-relaxed">
+                            <div className={`leading-relaxed ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                               {evac.reason}
-                              <div className="mt-1 font-mono text-[10px] text-purple-600">Helipad: {evac.staging_helipad}</div>
+                              <div className="mt-1 font-mono text-[10px] text-purple-400">Helipad: {evac.staging_helipad}</div>
                             </div>
                           ) : (
-                            <div className="font-mono text-green-600">
+                            <div className="font-mono text-emerald-500 font-semibold">
                               {evac.evacuation_route?.join(" → ")} · {evac.distance_km}km · {evac.eta_minutes}min
                             </div>
                           )}
@@ -256,21 +309,33 @@ export function DispatchHubPage({ dispatchPlan, depots, onNavigate, mode, setMod
 
                         {/* 3-Way mitigation */}
                         <div className="space-y-2">
-                          <div className="sk-section-label text-[10px]">3-Way Access Mitigation</div>
-                          <OptionBadge letter="A"
+                          <div className={`sk-section-label text-[10px] ${txtM}`}>3-Way Access Mitigation</div>
+                          <OptionBadge
+                            letter="A"
                             colorClass="bg-sky-50 border-sky-200 text-sky-700"
+                            darkColorClass="bg-sky-950/40 border-sky-800/40 text-sky-300"
+                            isDark={isDark}
                             title="Alternate Detour:"
                             body={mit.option_a_alternate_route.available
                               ? `${mit.option_a_alternate_route.description} (${mit.option_a_alternate_route.eta_minutes}m)`
-                              : "Blocked — all surface roads impassable."} />
-                          <OptionBadge letter="B"
+                              : "Blocked — all surface roads impassable."}
+                          />
+                          <OptionBadge
+                            letter="B"
                             colorClass="bg-amber-50 border-amber-200 text-amber-700"
+                            darkColorClass="bg-amber-950/40 border-amber-800/40 text-amber-300"
+                            isDark={isDark}
                             title="Excavator Clearance:"
-                            body={`${mit.option_b_excavator_clearance.description} (ETA: ${mit.option_b_excavator_clearance.total_clearance_eta_hours}h)`} />
-                          <OptionBadge letter="C"
+                            body={`${mit.option_b_excavator_clearance.description} (ETA: ${mit.option_b_excavator_clearance.total_clearance_eta_hours}h)`}
+                          />
+                          <OptionBadge
+                            letter="C"
                             colorClass="bg-purple-50 border-purple-200 text-purple-700"
+                            darkColorClass="bg-purple-950/40 border-purple-800/40 text-purple-300"
+                            isDark={isDark}
                             title="Aerial/Trail Transit:"
-                            body={mit.option_c_foot_or_aerial.description} />
+                            body={mit.option_c_foot_or_aerial.description}
+                          />
                         </div>
 
                         {/* Assigned resources */}
@@ -362,9 +427,18 @@ export function DispatchHubPage({ dispatchPlan, depots, onNavigate, mode, setMod
                       { emoji: "⚙️", label: "Excavators", value: depot.resources.excavator },
                       { emoji: "✚", label: "Medical", value: depot.resources.medical_team },
                     ].map((item) => (
-                      <div key={item.label} className="bg-slate-50 rounded-xl border border-slate-100 px-3 py-2">
-                        <div className="text-[10px] text-slate-400 font-mono">{item.emoji} {item.label}</div>
-                        <div className="font-mono font-black text-slate-800 text-base mt-0.5">{item.value}</div>
+                      <div
+                        key={item.label}
+                        className={`rounded-xl border px-3 py-2 ${
+                          isDark ? "bg-white/[0.04] border-white/[0.06]" : "bg-slate-50 border-slate-100"
+                        }`}
+                      >
+                        <div className={`text-[10px] font-mono ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                          {item.emoji} {item.label}
+                        </div>
+                        <div className={`font-mono font-black text-base mt-0.5 ${isDark ? "text-white" : "text-slate-800"}`}>
+                          {item.value}
+                        </div>
                       </div>
                     ))}
                   </div>
