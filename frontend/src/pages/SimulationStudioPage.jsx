@@ -190,10 +190,10 @@ export function SimulationStudioPage({
           <div className="space-y-5">
 
             {/* Scenario Presets */}
-            <div className="sk-card p-5 space-y-4">
+            <div className={`${card} p-5 space-y-4`}>
               <div className="sk-section-label">
                 <Zap className="w-3.5 h-3.5 text-amber-500" />
-                Scenario Presets
+                <span className={txtM}>Scenario Presets</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <ScenarioCard
@@ -204,6 +204,7 @@ export function SimulationStudioPage({
                   borderClass=""
                   active={activePreset === "monsoon"}
                   onClick={() => applyPreset("monsoon", 140, 30, 20, 0.5)}
+                  isDark={isDark}
                 />
                 <ScenarioCard
                   icon={Mountain}
@@ -213,6 +214,7 @@ export function SimulationStudioPage({
                   borderClass=""
                   active={activePreset === "landslide"}
                   onClick={() => applyPreset("landslide", 100, 45, 35, 0.35)}
+                  isDark={isDark}
                 />
                 <ScenarioCard
                   icon={Zap}
@@ -222,6 +224,7 @@ export function SimulationStudioPage({
                   borderClass=""
                   active={activePreset === "flood"}
                   onClick={() => applyPreset("flood", 180, 10, 10, 0.4)}
+                  isDark={isDark}
                 />
                 <ScenarioCard
                   icon={Wind}
@@ -231,15 +234,16 @@ export function SimulationStudioPage({
                   borderClass=""
                   active={activePreset === "dry"}
                   onClick={() => applyPreset("dry", 20, 5, 3, 0.6)}
+                  isDark={isDark}
                 />
               </div>
             </div>
 
             {/* Parameter Sliders */}
-            <div className="sk-card p-5 space-y-5">
+            <div className={`${card} p-5 space-y-5`}>
               <div className="sk-section-label">
                 <SlidersHorizontal className="w-3.5 h-3.5 text-sky-500" />
-                Environmental Parameters
+                <span className={txtM}>Environmental Parameters</span>
               </div>
               <SketchSlider
                 label="Rainfall Intensity"
@@ -249,6 +253,7 @@ export function SimulationStudioPage({
                 onChange={setSimRain}
                 colorClass="bg-sky-400"
                 rangeClass="range-blue"
+                isDark={isDark}
               />
               <SketchSlider
                 label="Prior Antecedent (7-day)"
@@ -258,6 +263,7 @@ export function SimulationStudioPage({
                 onChange={setSimPrior1}
                 colorClass="bg-green-400"
                 rangeClass="range-green"
+                isDark={isDark}
               />
               <SketchSlider
                 label="Prior Antecedent (30-day)"
@@ -267,6 +273,7 @@ export function SimulationStudioPage({
                 onChange={setSimPrior2}
                 colorClass="bg-amber-400"
                 rangeClass="range-amber"
+                isDark={isDark}
               />
               <SketchSlider
                 label="Risk Threshold"
@@ -276,14 +283,15 @@ export function SimulationStudioPage({
                 onChange={(v) => setSimThreshold(v / 100)}
                 colorClass="bg-purple-400"
                 rangeClass="range-purple"
+                isDark={isDark}
               />
             </div>
 
             {/* Failure Corridors table */}
-            <div className="sk-card p-5">
+            <div className={`${card} p-5`}>
               <div className="sk-section-label mb-3">
                 <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
-                Critical Failure Corridors
+                <span className={txtM}>Critical Failure Corridors</span>
               </div>
               {loading ? (
                 <div className="py-8 text-center font-sketch text-slate-400 animate-pulse">
@@ -298,13 +306,19 @@ export function SimulationStudioPage({
                   {criticalSegs.map((seg, i) => (
                     <div
                       key={seg.edge_id || i}
-                      className="flex items-center justify-between py-2.5 px-4 bg-red-50 border border-red-100 rounded-xl"
+                      className={`flex items-center justify-between py-2.5 px-4 rounded-xl border ${
+                        isDark
+                          ? "bg-red-950/30 border-red-800/30 text-red-300"
+                          : "bg-red-50 border-red-100 text-slate-700"
+                      }`}
                     >
                       <div className="flex items-center gap-3">
-                        <span className="font-mono text-xs font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-lg">
+                        <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded-lg ${
+                          isDark ? "bg-red-900/50 text-red-300" : "bg-red-100 text-red-600"
+                        }`}>
                           {seg.edge_id}
                         </span>
-                        <span className="text-sm text-slate-700 font-medium">
+                        <span className={`text-sm font-medium ${isDark ? "text-slate-200" : "text-slate-700"}`}>
                           {seg.from} → {seg.to}
                         </span>
                       </div>
@@ -320,10 +334,10 @@ export function SimulationStudioPage({
           <div className="space-y-5">
 
             {/* Overall Risk Gauge */}
-            <div className="sk-card p-5 text-center space-y-3">
+            <div className={`${card} p-5 text-center space-y-3`}>
               <div className="sk-section-label justify-center">
                 <Activity className="w-3.5 h-3.5 text-sky-500" />
-                Network-Wide Risk Index
+                <span className={txtM}>Network-Wide Risk Index</span>
               </div>
               {loading ? (
                 <div className="h-24 flex items-center justify-center font-sketch text-slate-400 animate-pulse">
@@ -338,7 +352,7 @@ export function SimulationStudioPage({
                   }`}>
                     {overallRisk != null ? `${(overallRisk * 100).toFixed(0)}%` : "—"}
                   </div>
-                  <div className="text-xs font-medium text-slate-500 font-mono">
+                  <div className={`text-xs font-medium font-mono ${txtM}`}>
                     {overallRisk >= 0.7 ? "CRITICAL NETWORK STATE"
                       : overallRisk >= 0.4 ? "ELEVATED RISK STATE"
                       : "OPERATIONAL NETWORK"}
@@ -346,7 +360,7 @@ export function SimulationStudioPage({
                 </div>
               )}
               {/* Gauge bar */}
-              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div className={`h-2 rounded-full overflow-hidden ${isDark ? "bg-white/[0.08]" : "bg-slate-100"}`}>
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${
                     overallRisk >= 0.7 ? "bg-red-400"
@@ -359,49 +373,68 @@ export function SimulationStudioPage({
             </div>
 
             {/* Segment Breakdown */}
-            <div className="sk-card p-5 space-y-3">
+            <div className={`${card} p-5 space-y-3`}>
               <div className="sk-section-label">
                 <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
-                Segment Breakdown
+                <span className={txtM}>Segment Breakdown</span>
               </div>
               <div className="space-y-2">
-                <div className="flex items-center justify-between py-2.5 px-4 bg-red-50 border border-red-100 rounded-xl">
+                <div className={`flex items-center justify-between py-2.5 px-4 rounded-xl border ${
+                  isDark ? "bg-red-950/30 border-red-800/30" : "bg-red-50 border-red-100"
+                }`}>
                   <div className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
-                    <span className="text-sm font-medium text-slate-700">Critical (≥70%)</span>
+                    <span className={`text-sm font-medium ${isDark ? "text-slate-200" : "text-slate-700"}`}>
+                      Critical (≥70%)
+                    </span>
                   </div>
-                  <span className="font-mono font-bold text-red-600 text-lg">{loading ? "…" : criticalCount}</span>
+                  <span className="font-mono font-bold text-red-500 text-lg">{loading ? "…" : criticalCount}</span>
                 </div>
-                <div className="flex items-center justify-between py-2.5 px-4 bg-amber-50 border border-amber-100 rounded-xl">
+                <div className={`flex items-center justify-between py-2.5 px-4 rounded-xl border ${
+                  isDark ? "bg-amber-950/30 border-amber-800/30" : "bg-amber-50 border-amber-100"
+                }`}>
                   <div className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-                    <span className="text-sm font-medium text-slate-700">Elevated (40–70%)</span>
+                    <span className={`text-sm font-medium ${isDark ? "text-slate-200" : "text-slate-700"}`}>
+                      Elevated (40–70%)
+                    </span>
                   </div>
-                  <span className="font-mono font-bold text-amber-600 text-lg">{loading ? "…" : elevatedCount}</span>
+                  <span className="font-mono font-bold text-amber-500 text-lg">{loading ? "…" : elevatedCount}</span>
                 </div>
-                <div className="flex items-center justify-between py-2.5 px-4 bg-green-50 border border-green-100 rounded-xl">
+                <div className={`flex items-center justify-between py-2.5 px-4 rounded-xl border ${
+                  isDark ? "bg-emerald-950/30 border-emerald-800/30" : "bg-green-50 border-green-100"
+                }`}>
                   <div className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
-                    <span className="text-sm font-medium text-slate-700">Safe (&lt;40%)</span>
+                    <span className={`text-sm font-medium ${isDark ? "text-slate-200" : "text-slate-700"}`}>
+                      Safe (&lt;40%)
+                    </span>
                   </div>
-                  <span className="font-mono font-bold text-green-600 text-lg">{loading ? "…" : safeCount}</span>
+                  <span className="font-mono font-bold text-emerald-500 text-lg">{loading ? "…" : safeCount}</span>
                 </div>
               </div>
             </div>
 
             {/* All segments list */}
             {simulationData?.segments && (
-              <div className="sk-card p-5 space-y-3">
+              <div className={`${card} p-5 space-y-3`}>
                 <div className="sk-section-label">
                   <CheckCircle2 className="w-3.5 h-3.5 text-slate-500" />
-                  All Segments
+                  <span className={txtM}>All Segments</span>
                 </div>
                 <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
                   {simulationData.segments.map((seg, i) => (
-                    <div key={i} className="flex items-center justify-between py-2 px-3 hover:bg-slate-50 rounded-xl transition-colors">
+                    <div
+                      key={i}
+                      className={`flex items-center justify-between py-2 px-3 rounded-xl transition-colors ${
+                        isDark ? "hover:bg-white/[0.04]" : "hover:bg-slate-50"
+                      }`}
+                    >
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-[10px] text-slate-400">{seg.edge_id}</span>
-                        <span className="text-xs text-slate-700">{seg.from} → {seg.to}</span>
+                        <span className={`font-mono text-[10px] ${txtM}`}>{seg.edge_id}</span>
+                        <span className={`text-xs ${isDark ? "text-slate-200" : "text-slate-700"}`}>
+                          {seg.from} → {seg.to}
+                        </span>
                       </div>
                       <RiskBadge risk={seg.risk} />
                     </div>
@@ -413,7 +446,7 @@ export function SimulationStudioPage({
             {/* CTA */}
             <button
               onClick={() => onNavigate("command")}
-              className="w-full py-3.5 bg-slate-900 hover:bg-slate-700 text-white rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm"
+              className={`w-full py-3.5 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer ${btnPri}`}
             >
               <Compass className="w-4 h-4" />
               View on Live Command Deck
