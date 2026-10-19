@@ -1,340 +1,394 @@
 import React, { useState, useEffect } from "react";
 import {
-  SlidersHorizontal,
   CloudRain,
   Mountain,
-  AlertTriangle,
+  Zap,
+  Wind,
   ArrowRight,
   RotateCcw,
-  Compass,
-  Layers,
-  Activity,
+  SlidersHorizontal,
+  AlertTriangle,
   CheckCircle2,
-  TrendingUp,
+  Activity,
+  Compass,
 } from "lucide-react";
 import { api } from "../services/api";
 
+// ── Sketch Slider ─────────────────────────────────────────────────────────────
+function SketchSlider({ label, value, min, max, step = 1, onChange, unit = "", colorClass = "bg-sky-400", rangeClass = "range-blue" }) {
+  const pct = ((value - min) / (max - min)) * 100;
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium text-slate-600">{label}</span>
+        <span className="font-mono text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-lg">
+          {value}{unit}
+        </span>
+      </div>
+      <div className="relative">
+        <div className="h-[5px] bg-slate-200 rounded-full overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all ${colorClass}`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className={`absolute inset-0 opacity-0 w-full cursor-pointer ${rangeClass}`}
+          style={{ height: "5px", top: 0 }}
+        />
+        {/* Visible thumb */}
+        <div
+          className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-sky-400 shadow-sm pointer-events-none transition-all"
+          style={{ left: `calc(${pct}% - 8px)` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ── Scenario Preset Card ──────────────────────────────────────────────────────
+function ScenarioCard({ icon: Icon, label, desc, colorClass, borderClass, onClick, active }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full text-left p-4 rounded-2xl border-2 transition-all duration-150 group
+        ${borderClass} ${colorClass}
+        ${active ? "ring-2 ring-offset-1 ring-slate-400 shadow-md" : "hover:shadow-sm hover:scale-[1.01]"}`}
+    >
+      <div className="flex items-start gap-3">
+        <div className="p-2 bg-white/70 rounded-xl border border-white/60">
+          <Icon className="w-5 h-5 text-slate-700" strokeWidth={1.6} />
+        </div>
+        <div>
+          <div className="font-sketch text-base font-bold text-slate-800 leading-tight">{label}</div>
+          <div className="text-xs text-slate-500 mt-0.5 leading-relaxed">{desc}</div>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+// ── Risk Badge ────────────────────────────────────────────────────────────────
+function RiskBadge({ risk }) {
+  if (risk == null) return <span className="sk-pill bg-slate-100 text-slate-400 border-slate-200">—</span>;
+  const pct = (risk * 100).toFixed(0);
+  if (risk >= 0.7) return <span className="sk-pill bg-red-100 text-red-700 border-red-300">{pct}% CRITICAL</span>;
+  if (risk >= 0.4) return <span className="sk-pill bg-amber-100 text-amber-700 border-amber-300">{pct}% ELEVATED</span>;
+  return <span className="sk-pill bg-green-100 text-green-700 border-green-300">{pct}% SAFE</span>;
+}
+
+// ── Main Component ────────────────────────────────────────────────────────────
 export function SimulationStudioPage({
-  simRain,
-  setSimRain,
-  simPrior1,
-  setSimPrior1,
-  simPrior2,
-  setSimPrior2,
-  simThreshold,
-  setSimThreshold,
+  simRain, setSimRain,
+  simPrior1, setSimPrior1,
+  simPrior2, setSimPrior2,
+  simThreshold, setSimThreshold,
   onNavigate,
 }) {
   const [simulationData, setSimulationData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [activePreset, setActivePreset] = useState(null);
 
-  // Fetch simulation results whenever sliders change
   useEffect(() => {
     setLoading(true);
-    api
-      .getSimulationRisk({
-        rainfall: simRain,
-        prior1: simPrior1,
-        prior2: simPrior2,
-        threshold: simThreshold,
-      })
-      .then((data) => {
-        setSimulationData(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Simulation error:", err);
-        setLoading(false);
-      });
+    api.getSimulationRisk({ rainfall: simRain, prior1: simPrior1, prior2: simPrior2, threshold: simThreshold })
+      .then((data) => { setSimulationData(data); setLoading(false); })
+      .catch((err) => { console.error("Simulation error:", err); setLoading(false); });
   }, [simRain, simPrior1, simPrior2, simThreshold]);
 
-  // Presets
-  const applyPreset = (rain, p1, p2, threshold = 0.5) => {
-    setSimRain(rain);
-    setSimPrior1(p1);
-    setSimPrior2(p2);
-    setSimThreshold(threshold);
+  const applyPreset = (id, rain, p1, p2, th) => {
+    setActivePreset(id);
+    setSimRain(rain); setSimPrior1(p1); setSimPrior2(p2); setSimThreshold(th);
   };
 
-  const segments = simulationData?.segments || [];
-  const blockedSegments = segments.filter((s) => s.blocked);
-  const safeSegments = segments.filter((s) => !s.blocked);
+  const criticalCount = simulationData?.segments
+    ? simulationData.segments.filter((s) => s.risk >= 0.7).length : 0;
+  const elevatedCount = simulationData?.segments
+    ? simulationData.segments.filter((s) => s.risk >= 0.4 && s.risk < 0.7).length : 0;
+  const safeCount = simulationData?.segments
+    ? simulationData.segments.filter((s) => s.risk < 0.4).length : 0;
+  const criticalSegs = simulationData?.segments
+    ? simulationData.segments.filter((s) => s.risk >= 0.7).slice(0, 5) : [];
+  const overallRisk = simulationData?.overall_risk;
 
   return (
-    <div className="min-h-screen bg-[#050811] text-slate-100 p-6 lg:p-10 space-y-10 max-w-7xl mx-auto">
-      {/* 1. HEADER */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/[0.08] pb-8">
-        <div className="space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 font-mono text-xs">
-            <SlidersHorizontal className="w-3.5 h-3.5" />
-            <span>CRISIS SANDBOX • HIMALAYAN CLOUDBURST STRESS-TEST</span>
+    <div className="sk-page min-h-screen p-5 lg:p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+
+        {/* ── HEADER ────────────────────────────────────────────────── */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <div className="sk-section-label">
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              Crisis Simulator · Scenario Modelling
+            </div>
+            <h1 className="font-sketch text-4xl lg:text-5xl font-bold text-slate-900 leading-tight">
+              Simulation Studio
+            </h1>
+            <p className="text-sm text-slate-500 mt-2 max-w-xl">
+              Adjust environmental parameters to preview cascading network failure
+              across all 9 Rudraprayag road corridors.
+            </p>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
-            Precipitation Stress Studio.
-          </h1>
-          <p className="text-sm sm:text-base text-slate-400 max-w-2xl">
-            Simulate catastrophic monsoonal cloudbursts across the Mandakini gorge.
-            Stress-test road vulnerability, anticipate high-hazard bottlenecks, and evaluate graph severance before real disasters strike.
-          </p>
-        </div>
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => onNavigate("command")}
-            className="px-5 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-cyan-500/20 cursor-pointer"
-          >
-            <Compass className="w-4 h-4" />
-            <span>Simulate on Map Deck</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 2. SCENARIO PRESETS BAR */}
-      <div className="space-y-3">
-        <span className="text-xs font-mono uppercase tracking-wider text-slate-400">
-          Disaster Scenario Presets
-        </span>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <button
-            onClick={() => applyPreset(20, 5, 0)}
-            className="glass-panel p-4 rounded-xl text-left hover:border-emerald-500/40 transition-all cursor-pointer group"
-          >
-            <div className="flex justify-between items-center text-xs font-mono text-emerald-400 mb-1">
-              <span>Scenario A</span>
-              <span>20 mm/hr</span>
-            </div>
-            <h4 className="font-bold text-sm text-white group-hover:text-emerald-300">
-              Baseline Monsoonal Shower
-            </h4>
-            <p className="text-[11px] text-slate-400 mt-1">Normal precipitation. All corridors operational.</p>
-          </button>
-
-          <button
-            onClick={() => applyPreset(55, 15, 10)}
-            className="glass-panel p-4 rounded-xl text-left hover:border-amber-500/40 transition-all cursor-pointer group"
-          >
-            <div className="flex justify-between items-center text-xs font-mono text-amber-400 mb-1">
-              <span>Scenario B</span>
-              <span>55 mm/hr</span>
-            </div>
-            <h4 className="font-bold text-sm text-white group-hover:text-amber-300">
-              High Hazard Warning
-            </h4>
-            <p className="text-[11px] text-slate-400 mt-1">Pre-alert stage. Steep slopes near critical threshold.</p>
-          </button>
-
-          <button
-            onClick={() => applyPreset(85, 25, 15)}
-            className="glass-panel p-4 rounded-xl text-left hover:border-red-500/40 transition-all cursor-pointer group"
-          >
-            <div className="flex justify-between items-center text-xs font-mono text-red-400 mb-1">
-              <span>Scenario C</span>
-              <span>85 mm/hr</span>
-            </div>
-            <h4 className="font-bold text-sm text-white group-hover:text-red-300">
-              Kedarnath Cut-Off Disaster
-            </h4>
-            <p className="text-[11px] text-slate-400 mt-1">E06 &amp; E07 collapse. High-altitude habitations isolated.</p>
-          </button>
-
-          <button
-            onClick={() => applyPreset(130, 45, 25)}
-            className="glass-panel p-4 rounded-xl text-left hover:border-purple-500/40 transition-all cursor-pointer group"
-          >
-            <div className="flex justify-between items-center text-xs font-mono text-purple-400 mb-1">
-              <span>Scenario D</span>
-              <span>130 mm/hr</span>
-            </div>
-            <h4 className="font-bold text-sm text-white group-hover:text-purple-300">
-              Catastrophic Cloudburst
-            </h4>
-            <p className="text-[11px] text-slate-400 mt-1">Severe valley-wide devastation. 100% airlift mobilization.</p>
-          </button>
-        </div>
-      </div>
-
-      {/* 3. SIMULATION PARAMETER CONTROLS & IMPACT METRICS */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Sliders Panel */}
-        <div className="glass-panel p-6 sm:p-8 rounded-2xl space-y-6 lg:col-span-2">
-          <div className="flex justify-between items-center border-b border-white/[0.08] pb-4">
-            <div>
-              <h3 className="text-lg font-bold text-white">Custom Stress Variables</h3>
-              <p className="text-xs text-slate-400">
-                Adjust dynamic precipitation forces to evaluate network collapse limits.
-              </p>
-            </div>
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => applyPreset(85, 10, 5, 0.5)}
-              className="text-xs font-mono text-slate-400 hover:text-white flex items-center gap-1.5 cursor-pointer"
+              onClick={() => { setSimRain(80); setSimPrior1(20); setSimPrior2(15); setSimThreshold(0.5); setActivePreset(null); }}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset</span>
+              Reset
             </button>
-          </div>
-
-          <div className="space-y-6">
-            {/* Slider 1: Active Rainfall */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center font-mono text-xs">
-                <span className="text-slate-300 font-semibold flex items-center gap-2">
-                  <CloudRain className="w-4 h-4 text-cyan-400" />
-                  Active Rainfall Intensity (R)
-                </span>
-                <span className="text-lg font-bold text-white">{simRain} mm/hr</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="150"
-                step="5"
-                value={simRain}
-                onChange={(e) => setSimRain(Number(e.target.value))}
-                className="w-full accent-cyan-400 cursor-pointer h-2 bg-slate-900 rounded-lg"
-              />
-              <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-                <span>0 mm/hr (Dry)</span>
-                <span>50 mm/hr (Heavy)</span>
-                <span>150 mm/hr (Severe Cloudburst)</span>
-              </div>
-            </div>
-
-            {/* Slider 2: Prior 24-48h Saturation */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center font-mono text-xs">
-                <span className="text-slate-300 font-semibold flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-emerald-400" />
-                  Prior 24–48h Rain (Weight: 0.50)
-                </span>
-                <span className="text-lg font-bold text-white">{simPrior1} mm</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="80"
-                step="5"
-                value={simPrior1}
-                onChange={(e) => setSimPrior1(Number(e.target.value))}
-                className="w-full accent-emerald-400 cursor-pointer h-2 bg-slate-900 rounded-lg"
-              />
-              <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-                <span>0 mm</span>
-                <span>40 mm</span>
-                <span>80 mm (Deep Saturation)</span>
-              </div>
-            </div>
-
-            {/* Slider 3: Prior 48-72h Saturation */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center font-mono text-xs">
-                <span className="text-slate-300 font-semibold flex items-center gap-2">
-                  <Mountain className="w-4 h-4 text-amber-400" />
-                  Prior 48–72h Rain (Weight: 0.25)
-                </span>
-                <span className="text-lg font-bold text-white">{simPrior2} mm</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="80"
-                step="5"
-                value={simPrior2}
-                onChange={(e) => setSimPrior2(Number(e.target.value))}
-                className="w-full accent-amber-400 cursor-pointer h-2 bg-slate-900 rounded-lg"
-              />
-              <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-                <span>0 mm</span>
-                <span>40 mm</span>
-                <span>80 mm</span>
-              </div>
-            </div>
-
-            {/* Slider 4: Failure Cut-off Threshold */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center font-mono text-xs">
-                <span className="text-slate-300 font-semibold flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-purple-400" />
-                  Failure Probability Cut-off Threshold
-                </span>
-                <span className="text-lg font-bold text-white font-mono">
-                  {(simThreshold * 100).toFixed(0)}%
-                </span>
-              </div>
-              <input
-                type="range"
-                min="0.3"
-                max="0.8"
-                step="0.05"
-                value={simThreshold}
-                onChange={(e) => setSimThreshold(Number(e.target.value))}
-                className="w-full accent-purple-400 cursor-pointer h-2 bg-slate-900 rounded-lg"
-              />
-              <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-                <span>30% (High Precaution)</span>
-                <span>50% (Standard)</span>
-                <span>80% (Extreme Failure Limit)</span>
-              </div>
-            </div>
+            <button
+              onClick={() => onNavigate("command")}
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-slate-900 rounded-xl hover:bg-slate-700 transition-all"
+            >
+              <Compass className="w-3.5 h-3.5" />
+              View Live Map
+            </button>
           </div>
         </div>
 
-        {/* Real-time Impact Scorecard */}
-        <div className="glass-panel p-6 sm:p-8 rounded-2xl space-y-6 flex flex-col justify-between">
-          <div className="space-y-4">
-            <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-wider">
-              Projected Network Consequences
-            </span>
+        {/* ── 2-COL GRID ────────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-5">
 
-            <div className="p-4 rounded-xl bg-slate-900/80 border border-white/10 space-y-3">
-              <div className="flex justify-between items-baseline">
-                <span className="text-xs text-slate-400">Roads Severed</span>
-                <span className="text-3xl font-extrabold font-mono text-red-400">
-                  {blockedSegments.length} <span className="text-xs font-normal text-slate-400">/ 12</span>
-                </span>
+          {/* LEFT COLUMN */}
+          <div className="space-y-5">
+
+            {/* Scenario Presets */}
+            <div className="sk-card p-5 space-y-4">
+              <div className="sk-section-label">
+                <Zap className="w-3.5 h-3.5 text-amber-500" />
+                Scenario Presets
               </div>
-              <div className="flex justify-between items-baseline border-t border-white/5 pt-2">
-                <span className="text-xs text-slate-400">Operational Corridors</span>
-                <span className="text-xl font-bold font-mono text-emerald-400">
-                  {safeSegments.length} Open
-                </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <ScenarioCard
+                  icon={CloudRain}
+                  label="Monsoon Surge"
+                  desc="Heavy sustained rainfall across all sectors"
+                  colorClass="sk-card-green"
+                  borderClass=""
+                  active={activePreset === "monsoon"}
+                  onClick={() => applyPreset("monsoon", 140, 30, 20, 0.5)}
+                />
+                <ScenarioCard
+                  icon={Mountain}
+                  label="Landslide Chain"
+                  desc="Sequential debris flows on steep corridors"
+                  colorClass="sk-card-amber"
+                  borderClass=""
+                  active={activePreset === "landslide"}
+                  onClick={() => applyPreset("landslide", 100, 45, 35, 0.35)}
+                />
+                <ScenarioCard
+                  icon={Zap}
+                  label="Flash Flood"
+                  desc="Rapid onset flood — Kedarnath upstream"
+                  colorClass="sk-card-red"
+                  borderClass=""
+                  active={activePreset === "flood"}
+                  onClick={() => applyPreset("flood", 180, 10, 10, 0.4)}
+                />
+                <ScenarioCard
+                  icon={Wind}
+                  label="Dry Season Dry Run"
+                  desc="Minimal rainfall, clear road network"
+                  colorClass="sk-card-purple"
+                  borderClass=""
+                  active={activePreset === "dry"}
+                  onClick={() => applyPreset("dry", 20, 5, 3, 0.6)}
+                />
               </div>
             </div>
 
-            <div className="space-y-2 pt-2">
-              <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">
-                Critical Failure Corridors
-              </span>
-              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                {blockedSegments.map((seg) => (
-                  <div
-                    key={seg.segment_id}
-                    className="p-2.5 rounded-lg bg-red-950/30 border border-red-900/50 flex justify-between items-center text-xs"
-                  >
-                    <div>
-                      <span className="font-bold text-white font-mono">{seg.segment_id}</span>
-                      <div className="text-[10px] text-red-300 font-sans">{seg.name}</div>
-                    </div>
-                    <div className="text-right font-mono text-red-400 font-bold">
-                      {(seg.probability * 100).toFixed(0)}% Risk
-                    </div>
-                  </div>
-                ))}
-                {blockedSegments.length === 0 && (
-                  <div className="text-center py-6 text-xs text-emerald-400 font-mono">
-                    All corridors passable under this load.
-                  </div>
-                )}
+            {/* Parameter Sliders */}
+            <div className="sk-card p-5 space-y-5">
+              <div className="sk-section-label">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-sky-500" />
+                Environmental Parameters
               </div>
+              <SketchSlider
+                label="Rainfall Intensity"
+                value={simRain}
+                min={0} max={200} step={5}
+                unit=" mm"
+                onChange={setSimRain}
+                colorClass="bg-sky-400"
+                rangeClass="range-blue"
+              />
+              <SketchSlider
+                label="Prior Antecedent (7-day)"
+                value={simPrior1}
+                min={0} max={60} step={1}
+                unit=" mm"
+                onChange={setSimPrior1}
+                colorClass="bg-green-400"
+                rangeClass="range-green"
+              />
+              <SketchSlider
+                label="Prior Antecedent (30-day)"
+                value={simPrior2}
+                min={0} max={80} step={1}
+                unit=" mm"
+                onChange={setSimPrior2}
+                colorClass="bg-amber-400"
+                rangeClass="range-amber"
+              />
+              <SketchSlider
+                label="Risk Threshold"
+                value={Math.round(simThreshold * 100)}
+                min={20} max={80} step={5}
+                unit="%"
+                onChange={(v) => setSimThreshold(v / 100)}
+                colorClass="bg-purple-400"
+                rangeClass="range-purple"
+              />
+            </div>
+
+            {/* Failure Corridors table */}
+            <div className="sk-card p-5">
+              <div className="sk-section-label mb-3">
+                <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
+                Critical Failure Corridors
+              </div>
+              {loading ? (
+                <div className="py-8 text-center font-sketch text-slate-400 animate-pulse">
+                  Simulating…
+                </div>
+              ) : criticalSegs.length === 0 ? (
+                <div className="py-8 text-center font-sketch text-slate-400">
+                  No critical segments at current parameters
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {criticalSegs.map((seg, i) => (
+                    <div
+                      key={seg.edge_id || i}
+                      className="flex items-center justify-between py-2.5 px-4 bg-red-50 border border-red-100 rounded-xl"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="font-mono text-xs font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-lg">
+                          {seg.edge_id}
+                        </span>
+                        <span className="text-sm text-slate-700 font-medium">
+                          {seg.from} → {seg.to}
+                        </span>
+                      </div>
+                      <RiskBadge risk={seg.risk} />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="pt-4 border-t border-white/[0.08]">
+          {/* RIGHT COLUMN — Network Impact */}
+          <div className="space-y-5">
+
+            {/* Overall Risk Gauge */}
+            <div className="sk-card p-5 text-center space-y-3">
+              <div className="sk-section-label justify-center">
+                <Activity className="w-3.5 h-3.5 text-sky-500" />
+                Network-Wide Risk Index
+              </div>
+              {loading ? (
+                <div className="h-24 flex items-center justify-center font-sketch text-slate-400 animate-pulse">
+                  Computing…
+                </div>
+              ) : (
+                <div className="relative inline-flex flex-col items-center gap-1">
+                  <div className={`text-6xl font-sketch font-bold ${
+                    overallRisk >= 0.7 ? "text-red-500"
+                    : overallRisk >= 0.4 ? "text-amber-500"
+                    : "text-green-500"
+                  }`}>
+                    {overallRisk != null ? `${(overallRisk * 100).toFixed(0)}%` : "—"}
+                  </div>
+                  <div className="text-xs font-medium text-slate-500 font-mono">
+                    {overallRisk >= 0.7 ? "CRITICAL NETWORK STATE"
+                      : overallRisk >= 0.4 ? "ELEVATED RISK STATE"
+                      : "OPERATIONAL NETWORK"}
+                  </div>
+                </div>
+              )}
+              {/* Gauge bar */}
+              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    overallRisk >= 0.7 ? "bg-red-400"
+                    : overallRisk >= 0.4 ? "bg-amber-400"
+                    : "bg-green-400"
+                  }`}
+                  style={{ width: `${(overallRisk ?? 0) * 100}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Segment Breakdown */}
+            <div className="sk-card p-5 space-y-3">
+              <div className="sk-section-label">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
+                Segment Breakdown
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between py-2.5 px-4 bg-red-50 border border-red-100 rounded-xl">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+                    <span className="text-sm font-medium text-slate-700">Critical (≥70%)</span>
+                  </div>
+                  <span className="font-mono font-bold text-red-600 text-lg">{loading ? "…" : criticalCount}</span>
+                </div>
+                <div className="flex items-center justify-between py-2.5 px-4 bg-amber-50 border border-amber-100 rounded-xl">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                    <span className="text-sm font-medium text-slate-700">Elevated (40–70%)</span>
+                  </div>
+                  <span className="font-mono font-bold text-amber-600 text-lg">{loading ? "…" : elevatedCount}</span>
+                </div>
+                <div className="flex items-center justify-between py-2.5 px-4 bg-green-50 border border-green-100 rounded-xl">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
+                    <span className="text-sm font-medium text-slate-700">Safe (&lt;40%)</span>
+                  </div>
+                  <span className="font-mono font-bold text-green-600 text-lg">{loading ? "…" : safeCount}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* All segments list */}
+            {simulationData?.segments && (
+              <div className="sk-card p-5 space-y-3">
+                <div className="sk-section-label">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-slate-500" />
+                  All Segments
+                </div>
+                <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
+                  {simulationData.segments.map((seg, i) => (
+                    <div key={i} className="flex items-center justify-between py-2 px-3 hover:bg-slate-50 rounded-xl transition-colors">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-[10px] text-slate-400">{seg.edge_id}</span>
+                        <span className="text-xs text-slate-700">{seg.from} → {seg.to}</span>
+                      </div>
+                      <RiskBadge risk={seg.risk} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* CTA */}
             <button
               onClick={() => onNavigate("command")}
-              className="w-full py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/25"
+              className="w-full py-3.5 bg-slate-900 hover:bg-slate-700 text-white rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm"
             >
-              <span>View On Live Command Deck</span>
+              <Compass className="w-4 h-4" />
+              View on Live Command Deck
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
