@@ -160,12 +160,38 @@ export function IntelligenceLabPage({ network, onNavigate, isDark = false }) {
               </button>
             </div>
             {/* Sketch illustration */}
-            <div className="hidden md:block w-64 shrink-0">
-              <img
-                src={BRAIN_SKETCH}
-                alt="Intelligence sketch"
-                className="w-full h-40 object-contain object-center opacity-85 mix-blend-multiply"
-              />
+            <div className="w-full md:w-80 shrink-0 flex items-center justify-center">
+              <div
+                className={`w-full p-2.5 rounded-2xl border transition-all ${
+                  isDark
+                    ? "bg-[#1e293b]/60 border-white/10 shadow-inner"
+                    : "bg-white border-2 border-slate-900/10 shadow-sm"
+                }`}
+              >
+                <img
+                  src={BRAIN_SKETCH}
+                  alt="Bayesian & Neural Intelligence Sketch"
+                  className="w-full h-36 md:h-44 object-contain object-center transition-all"
+                  style={
+                    isDark
+                      ? {
+                          filter: "invert(0.92) hue-rotate(180deg) brightness(1.2) contrast(1.15)",
+                        }
+                      : {
+                          filter: "contrast(1.08)",
+                        }
+                  }
+                />
+                <div className="text-center mt-1.5">
+                  <span
+                    className={`text-[10px] font-mono tracking-wider uppercase font-semibold ${
+                      isDark ? "text-slate-400" : "text-slate-500"
+                    }`}
+                  >
+                    Bayesian Graph &amp; ML Architecture Sketch
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

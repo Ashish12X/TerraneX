@@ -15,8 +15,8 @@ import {
   Activity,
 } from "lucide-react";
 
-// Hero illustration
-const DISPATCH_SKETCH = "C:/Users/Smart-tech/.gemini/antigravity-ide/brain/307ccffe-2b56-4bd6-960b-74a92e6f6c94/sketch_dispatch_banner_1792444401176.jpg";
+// Hero illustration — served from public/
+const DISPATCH_SKETCH = "/sketch_dispatch.jpg";
 
 // ── Small helpers ─────────────────────────────────────────────────────────────
 function KpiCard({ icon: Icon, label, value, sub, colorClass = "bg-slate-50 border-slate-200 text-slate-700" }) {
@@ -47,8 +47,19 @@ function OptionBadge({ letter, colorClass, title, body }) {
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
-export function DispatchHubPage({ dispatchPlan, depots, onNavigate, mode, setMode }) {
+export function DispatchHubPage({ dispatchPlan, depots, onNavigate, mode, setMode, isDark = false }) {
   const [expandedId, setExpandedId] = useState(null);
+
+  // ── Dark mode tokens ───────────────────────────────────────────────────
+  const card   = isDark ? "bg-[#111827] border border-white/[0.07] rounded-2xl" : "sk-card";
+  const txtP   = isDark ? "text-slate-100" : "text-slate-900";
+  const txtM   = isDark ? "text-slate-400" : "text-slate-500";
+  const txtS   = isDark ? "text-slate-300" : "text-slate-700";
+  const subBg  = isDark ? "bg-white/[0.04] border-white/[0.06]" : "bg-slate-50 border-slate-100";
+  const brd    = isDark ? "border-white/[0.06]" : "border-slate-100";
+  const btnPri = isDark ? "bg-white text-slate-900 hover:bg-slate-100" : "bg-slate-900 text-white hover:bg-slate-700";
+  const btnSec = isDark ? "border-white/[0.1] text-slate-300 hover:bg-white/[0.06]" : "border-slate-200 text-slate-700 hover:bg-slate-50 bg-white";
+  const pg     = isDark ? "min-h-screen p-5 lg:p-8" : "sk-page min-h-screen p-5 lg:p-8";
 
   const summary = dispatchPlan?.summary || {
     total_cut_off_settlements: 0,
@@ -63,21 +74,21 @@ export function DispatchHubPage({ dispatchPlan, depots, onNavigate, mode, setMod
   const dispatches = dispatchPlan?.dispatches || [];
 
   return (
-    <div className="sk-page min-h-screen p-5 lg:p-8">
+    <div className={pg} style={isDark ? { background: '#0a0f1a', color: '#f1f5f9' } : {}}>
       <div className="max-w-7xl mx-auto space-y-6">
 
-        {/* ── HEADER ──────────────────────────────────────────────── */}
-        <div className="sk-card overflow-hidden">
+        {/* ── HEADER ── */}
+        <div className={`${card} overflow-hidden`}>
           <div className="flex flex-col md:flex-row gap-4 p-6">
             <div className="flex-1 space-y-3">
               <div className="sk-section-label">
                 <Truck className="w-3.5 h-3.5 text-purple-500" />
-                Dispatch Hub · Multi-Depot Emergency Coordination
+                <span className={txtM}>Dispatch Hub · Multi-Depot Emergency Coordination</span>
               </div>
-              <h1 className="font-sketch text-4xl lg:text-5xl font-bold text-slate-900 leading-tight">
+              <h1 className={`font-sketch text-4xl lg:text-5xl font-bold leading-tight ${txtP}`}>
                 Emergency Dispatch
               </h1>
-              <p className="text-sm text-slate-500 max-w-xl">
+              <p className={`text-sm max-w-xl ${txtM}`}>
                 Real-time allocation across 6 regional staging bases.
                 3-way access mitigation: alternate detours, PWD excavator clearance,
                 and automatic helicopter airlift escalation.
@@ -85,24 +96,50 @@ export function DispatchHubPage({ dispatchPlan, depots, onNavigate, mode, setMod
               <div className="flex gap-2 pt-1">
                 <button
                   onClick={() => onNavigate("command")}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-slate-900 rounded-xl hover:bg-slate-700 transition-all"
+                  className={`inline-flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all ${btnPri}`}
                 >
                   <Compass className="w-3.5 h-3.5" /> Open Live Map
                 </button>
                 <button
                   onClick={() => onNavigate("simulator")}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all"
+                  className={`inline-flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl border transition-all ${btnSec}`}
                 >
                   <Activity className="w-3.5 h-3.5" /> Run Scenario
                 </button>
               </div>
             </div>
-            <div className="hidden md:block w-64 shrink-0">
-              <img
-                src={DISPATCH_SKETCH}
-                alt="Dispatch sketch"
-                className="w-full h-40 object-contain object-center opacity-80 mix-blend-multiply"
-              />
+            <div className="w-full md:w-80 shrink-0 flex items-center justify-center">
+              <div
+                className={`w-full p-2.5 rounded-2xl border transition-all ${
+                  isDark
+                    ? "bg-[#1e293b]/60 border-white/10 shadow-inner"
+                    : "bg-white border-2 border-slate-900/10 shadow-sm"
+                }`}
+              >
+                <img
+                  src={DISPATCH_SKETCH}
+                  alt="Dispatch & Evacuation Network Sketch"
+                  className="w-full h-36 md:h-44 object-contain object-center transition-all"
+                  style={
+                    isDark
+                      ? {
+                          filter: "invert(0.92) hue-rotate(180deg) brightness(1.2) contrast(1.15)",
+                        }
+                      : {
+                          filter: "contrast(1.08)",
+                        }
+                  }
+                />
+                <div className="text-center mt-1.5">
+                  <span
+                    className={`text-[10px] font-mono tracking-wider uppercase font-semibold ${
+                      isDark ? "text-slate-400" : "text-slate-500"
+                    }`}
+                  >
+                    Himalayan Transit &amp; Evacuation Sketch
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -132,13 +169,13 @@ export function DispatchHubPage({ dispatchPlan, depots, onNavigate, mode, setMod
         {/* ── SETTLEMENT TRIAGE CARDS ─────────────────────────────── */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-sketch text-xl font-bold text-slate-900 flex items-center gap-2">
+            <h2 className={`font-sketch text-xl font-bold flex items-center gap-2 ${txtP}`}>
               Cut-Off Settlements
-              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-mono">
+              <span className={`text-xs px-2 py-0.5 rounded-full font-mono ${isDark ? 'bg-white/[0.08] text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
                 {dispatches.length} evaluated
               </span>
             </h2>
-            <span className="text-xs text-slate-400 font-mono">Ranked by population priority</span>
+            <span className={`text-xs font-mono ${txtM}`}>Ranked by population priority</span>
           </div>
 
           {dispatches.length > 0 ? (
@@ -151,21 +188,22 @@ export function DispatchHubPage({ dispatchPlan, depots, onNavigate, mode, setMod
                 const isExpanded = expandedId === settlement.settlement_id;
 
                 return (
-                  <div key={settlement.settlement_id} className="sk-card p-5 space-y-4">
+                  <div key={settlement.settlement_id} className={`${card} p-5 space-y-4`}>
                     {/* Top bar */}
                     <div
                       className="flex items-start justify-between cursor-pointer"
                       onClick={() => setExpandedId(isExpanded ? null : settlement.settlement_id)}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 font-mono font-black text-slate-700 text-sm flex items-center justify-center">
+                        <div className={`w-9 h-9 rounded-xl font-mono font-black text-sm flex items-center justify-center
+                          ${isDark ? 'bg-white/[0.08] border border-white/[0.1] text-slate-200' : 'bg-slate-100 border border-slate-200 text-slate-700'}`}>
                           #{settlement.triage_priority}
                         </div>
                         <div>
-                          <div className="font-sketch text-base font-bold text-slate-900">
+                          <div className={`font-sketch text-base font-bold ${txtP}`}>
                             {settlement.settlement_name}
                           </div>
-                          <div className="text-xs text-slate-500 font-mono">
+                          <div className={`text-xs font-mono ${txtM}`}>
                             {settlement.population.toLocaleString()} isolated residents
                           </div>
                         </div>
@@ -196,14 +234,14 @@ export function DispatchHubPage({ dispatchPlan, depots, onNavigate, mode, setMod
 
                     {/* Expanded detail */}
                     {isExpanded && (
-                      <div className="space-y-3 pt-2 border-t border-slate-100">
+                      <div className={`space-y-3 pt-2 border-t ${brd}`}>
                         {/* Evacuation */}
-                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs">
-                          <div className="flex justify-between items-center mb-1.5">
-                            <span className="font-mono text-[10px] text-slate-400 uppercase">Evacuation Protocol</span>
-                            <span className="font-bold text-slate-700">{evac.transport_mode}</span>
+                        <div className={`${subBg} border rounded-xl p-3 text-xs`}>
+                          <div className={`flex justify-between items-center mb-1.5`}>
+                            <span className={`font-mono text-[10px] uppercase ${txtM}`}>Evacuation Protocol</span>
+                            <span className={`font-bold ${txtS}`}>{evac.transport_mode}</span>
                           </div>
-                          <div className="font-semibold text-slate-800 mb-1">→ {evac.primary_hospital}</div>
+                          <div className={`font-semibold mb-1 ${txtP}`}>→ {evac.primary_hospital}</div>
                           {isAerial ? (
                             <div className="text-slate-500 leading-relaxed">
                               {evac.reason}
@@ -237,20 +275,20 @@ export function DispatchHubPage({ dispatchPlan, depots, onNavigate, mode, setMod
 
                         {/* Assigned resources */}
                         {settlement.assigned_resources?.length > 0 && (
-                          <div className="space-y-1.5 pt-2 border-t border-slate-100">
-                            <div className="sk-section-label text-[10px]">
+                          <div className={`space-y-1.5 pt-2 border-t ${brd}`}>
+                            <div className={`sk-section-label text-[10px]`}>
                               Dispatched Resources ({settlement.assigned_resources.length} units)
                             </div>
                             {settlement.assigned_resources.map((unit, idx) => (
                               <div key={idx}
-                                className="flex justify-between items-center px-3 py-2 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+                                className={`flex justify-between items-center px-3 py-2 ${subBg} rounded-xl border text-xs`}>
                                 <div>
-                                  <span className="font-bold text-slate-800 font-mono">{unit.quantity}× {unit.resource_type}</span>
-                                  <div className="text-[10px] text-slate-400">{unit.depot_name}</div>
+                                  <span className={`font-bold font-mono ${txtP}`}>{unit.quantity}× {unit.resource_type}</span>
+                                  <div className={`text-[10px] ${txtM}`}>{unit.depot_name}</div>
                                 </div>
                                 <div className="text-right font-mono">
-                                  <div className="text-green-600 font-semibold">ETA {unit.eta_minutes}m</div>
-                                  <div className="text-[10px] text-slate-400">{unit.dispatch_mode}</div>
+                                  <div className="text-green-500 font-semibold">ETA {unit.eta_minutes}m</div>
+                                  <div className={`text-[10px] ${txtM}`}>{unit.dispatch_mode}</div>
                                 </div>
                               </div>
                             ))}
@@ -262,7 +300,7 @@ export function DispatchHubPage({ dispatchPlan, depots, onNavigate, mode, setMod
                     {/* Expand toggle */}
                     <button
                       onClick={() => setExpandedId(isExpanded ? null : settlement.settlement_id)}
-                      className="w-full text-center text-xs text-slate-400 hover:text-slate-600 font-mono py-1 transition-colors"
+                      className={`w-full text-center text-xs font-mono py-1 transition-colors ${isDark ? 'text-slate-500 hover:text-slate-300' : 'text-slate-400 hover:text-slate-600'}`}
                     >
                       {isExpanded ? "▲ Collapse" : "▼ Show full triage detail"}
                     </button>
@@ -271,10 +309,10 @@ export function DispatchHubPage({ dispatchPlan, depots, onNavigate, mode, setMod
               })}
             </div>
           ) : (
-            <div className="sk-card p-16 text-center space-y-4">
+            <div className={`${card} p-16 text-center space-y-4`}>
               <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto" strokeWidth={1.4} />
-              <h3 className="font-sketch text-2xl font-bold text-slate-900">All Corridors Operational</h3>
-              <p className="text-sm text-slate-500 max-w-md mx-auto">
+              <h3 className={`font-sketch text-2xl font-bold ${txtP}`}>All Corridors Operational</h3>
+              <p className={`text-sm max-w-md mx-auto ${txtM}`}>
                 Zero Himalayan villages are isolated under current conditions.
                 Switch to the Crisis Simulator to stress-test extreme scenarios.
               </p>
@@ -290,26 +328,26 @@ export function DispatchHubPage({ dispatchPlan, depots, onNavigate, mode, setMod
 
         {/* ── DEPOT INVENTORY ─────────────────────────────────────── */}
         <div className="space-y-4">
-          <h2 className="font-sketch text-xl font-bold text-slate-900 flex items-center gap-2">
+          <h2 className={`font-sketch text-xl font-bold flex items-center gap-2 ${txtP}`}>
             Regional Staging Depots
-            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-mono">6 facilities</span>
+            <span className={`text-xs px-2 py-0.5 rounded-full font-mono ${isDark ? 'bg-white/[0.08] text-slate-300' : 'bg-slate-100 text-slate-600'}`}>6 facilities</span>
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {depots.map((depot) => {
               const isMachinery = depot.type === "pwd_bro_machinery_depot";
-              const isSdrf = depot.type === "sdrf_ndrf_base";
-              const dotClass = isMachinery ? "bg-amber-400" : isSdrf ? "bg-blue-400" : "bg-green-400";
-              const tagClass = isMachinery
-                ? "bg-amber-50 text-amber-700 border-amber-200"
+              const isSdrf      = depot.type === "sdrf_ndrf_base";
+              const dotClass    = isMachinery ? "bg-amber-400" : isSdrf ? "bg-blue-400" : "bg-green-400";
+              const tagClass    = isMachinery
+                ? isDark ? "bg-amber-950/50 text-amber-300 border-amber-800/50"   : "bg-amber-50 text-amber-700 border-amber-200"
                 : isSdrf
-                ? "bg-blue-50 text-blue-700 border-blue-200"
-                : "bg-sky-50 text-sky-700 border-sky-200";
+                ? isDark ? "bg-blue-950/50 text-blue-300 border-blue-800/50"     : "bg-blue-50 text-blue-700 border-blue-200"
+                : isDark ? "bg-sky-950/50 text-sky-300 border-sky-800/50"       : "bg-sky-50 text-sky-700 border-sky-200";
 
               return (
-                <div key={depot.id} className="sk-card p-5 space-y-4">
+                <div key={depot.id} className={`${card} p-5 space-y-4`}>
                   <div className="flex items-start justify-between">
                     <div>
-                      <div className="font-sketch font-bold text-slate-900 text-base">{depot.name}</div>
+                      <div className={`font-sketch font-bold text-base ${txtP}`}>{depot.name}</div>
                       <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border inline-block mt-1 ${tagClass}`}>
                         {depot.type.replace(/_/g, " ").toUpperCase()}
                       </span>

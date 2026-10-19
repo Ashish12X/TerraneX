@@ -21,6 +21,7 @@ export function OverviewPage({
   timelineData,
   currentHour,
   mlStatus,
+  isDark = false,
 }) {
   const currentStep = timelineData?.timeline?.[currentHour] || null;
   const blockedCount = currentStep?.blocked_count || 0;
@@ -28,7 +29,11 @@ export function OverviewPage({
   const rainNow = currentStep?.rainfall_mm || 0.0;
 
   return (
-    <div className="min-h-screen bg-[#fafbfc] text-[#0f172a] flex flex-col font-sans select-none overflow-x-hidden">
+    <div
+      className={`min-h-screen flex flex-col font-sans select-none overflow-x-hidden transition-colors duration-300 ${
+        isDark ? "bg-[#0a0f1a] text-[#f1f5f9]" : "bg-[#fafbfc] text-[#0f172a]"
+      }`}
+    >
       {/* 1. HERO SECTION (Exact Match to User Reference Sketch) */}
       <section className="relative min-h-[85vh] flex flex-col items-center justify-between px-4 sm:px-6 lg:px-12 pt-6 pb-12 overflow-hidden">
         {/* Clean Panoramic Sketch Landscape Illustration Backdrop */}
@@ -36,11 +41,34 @@ export function OverviewPage({
           <img
             src="/terranex_clean_sketch.jpg"
             alt="Terranex Himalayan Valley Landscape Sketch"
-            className="w-full h-full object-cover sm:object-contain object-center opacity-85 filter contrast-[1.05]"
+            className="w-full h-full object-cover sm:object-contain object-center transition-all duration-300"
+            style={
+              isDark
+                ? {
+                    filter: "invert(0.92) hue-rotate(180deg) brightness(1.2) contrast(1.15)",
+                    opacity: 0.35,
+                  }
+                : {
+                    filter: "contrast(1.05)",
+                    opacity: 0.85,
+                  }
+            }
           />
-          {/* Subtle soft white radial gradient in the center for maximum text legibility */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/80 to-white/90 sm:from-transparent sm:via-white/75 sm:to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-[#fafbfc]" />
+          {/* Subtle soft gradient in the center for maximum text legibility */}
+          <div
+            className={`absolute inset-0 ${
+              isDark
+                ? "bg-gradient-to-r from-[#0a0f1a]/90 via-[#0a0f1a]/70 to-[#0a0f1a]/90 sm:from-transparent sm:via-[#0a0f1a]/75 sm:to-transparent"
+                : "bg-gradient-to-r from-white/90 via-white/80 to-white/90 sm:from-transparent sm:via-white/75 sm:to-transparent"
+            }`}
+          />
+          <div
+            className={`absolute inset-0 ${
+              isDark
+                ? "bg-gradient-to-b from-[#0a0f1a]/60 via-transparent to-[#0a0f1a]"
+                : "bg-gradient-to-b from-white/40 via-transparent to-[#fafbfc]"
+            }`}
+          />
         </div>
 
         {/* Top Space Filler */}

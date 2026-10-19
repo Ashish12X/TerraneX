@@ -131,9 +131,27 @@ export function CommandDeckPage({
   setSelectedSegmentId,
   selectedSegmentData,
   onNavigate,
+  isDark = false,
 }) {
   const [camera, setCamera] = useState({ pos: RUDRAPRAYAG_CENTER, zoom: RUDRAPRAYAG_ZOOM });
   const [drawerOpen, setDrawerOpen] = useState(true);
+
+  // Theme-aware tokens
+  const hudContainerBg = isDark
+    ? "bg-[#0a0f1e]/90 backdrop-blur-xl border border-white/[0.09] shadow-2xl"
+    : "bg-white/95 backdrop-blur-xl border-2 border-slate-900/10 shadow-lg";
+  const hudItemBg = isDark
+    ? "bg-white/[0.04] border border-white/[0.06]"
+    : "bg-slate-50 border border-slate-200/80";
+  const hudLabel = isDark ? "text-slate-400" : "text-slate-500";
+  const hudValue = isDark ? "text-white" : "text-slate-900";
+
+  const presetContainerBg = isDark
+    ? "bg-slate-950/80 backdrop-blur-xl border border-white/10 shadow-2xl"
+    : "bg-white/95 backdrop-blur-xl border-2 border-slate-900/10 shadow-lg";
+  const presetBtn = isDark
+    ? "text-slate-400 hover:text-white hover:bg-white/5"
+    : "text-slate-600 hover:text-slate-950 hover:bg-slate-100 font-medium";
 
   // Derive Current Edge Probabilities
   const currentHourStep =
@@ -182,67 +200,77 @@ export function CommandDeckPage({
       : `${simRain} mm/hr (Sim load)`;
 
   return (
-    <div className="relative w-full h-[calc(100vh-4rem)] bg-[#060a14] overflow-hidden flex flex-col select-none">
+    <div
+      className={`relative w-full h-[calc(100vh-4rem)] overflow-hidden flex flex-col select-none transition-colors duration-300 ${
+        isDark ? "bg-[#060a14] text-slate-100" : "bg-[#f8fafc] text-slate-900"
+      }`}
+    >
       {/* 1. FLOATING TOP HUD STATUS RIBBON */}
       <div className="absolute top-4 left-4 right-4 z-20 pointer-events-none flex items-center justify-between gap-3">
         {/* Left Stats Cluster */}
-        <div className="pointer-events-auto flex items-center gap-1.5 bg-[#0a0f1e]/90 backdrop-blur-xl border border-white/[0.09] p-1.5 rounded-2xl shadow-2xl">
-          <div className="px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.06] flex flex-col gap-0.5">
-            <span className="text-[9px] font-mono uppercase tracking-wider text-slate-500">
+        <div className={`pointer-events-auto flex items-center gap-1.5 p-1.5 rounded-2xl ${hudContainerBg}`}>
+          <div className={`px-3 py-2 rounded-xl flex flex-col gap-0.5 ${hudItemBg}`}>
+            <span className={`text-[9px] font-mono uppercase tracking-wider ${hudLabel}`}>
               {mode === "live" ? "Forecast Precip" : "Simulated Precip"}
             </span>
-            <span className="text-xs font-bold text-white font-mono flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+            <span className={`text-xs font-bold font-mono flex items-center gap-1.5 ${hudValue}`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse shrink-0" />
               {activeRainfallDisplay}
             </span>
           </div>
 
-          <div className="px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.06] flex flex-col gap-0.5">
-            <span className="text-[9px] font-mono uppercase tracking-wider text-slate-500">Severed Roads</span>
-            <span className="text-xs font-bold font-mono flex items-center gap-1.5"
-              style={{ color: activeBlockedCount > 0 ? '#f87171' : '#6ee7b7' }}>
+          <div className={`px-3 py-2 rounded-xl flex flex-col gap-0.5 ${hudItemBg}`}>
+            <span className={`text-[9px] font-mono uppercase tracking-wider ${hudLabel}`}>Severed Roads</span>
+            <span
+              className="text-xs font-bold font-mono flex items-center gap-1.5"
+              style={{ color: activeBlockedCount > 0 ? (isDark ? "#f87171" : "#dc2626") : (isDark ? "#6ee7b7" : "#059669") }}
+            >
               {activeBlockedCount} Corridors
               {activeBlockedCount > 0 && (
-                <span className="text-[9px] px-1.5 py-px rounded-md bg-red-950/80 border border-red-700/50 text-red-300 font-mono">
+                <span className={`text-[9px] px-1.5 py-px rounded-md font-mono ${
+                  isDark
+                    ? "bg-red-950/80 border border-red-700/50 text-red-300"
+                    : "bg-red-100 border border-red-300 text-red-700"
+                }`}>
                   ALERT
                 </span>
               )}
             </span>
           </div>
 
-          <div className="hidden sm:flex px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.06] flex-col gap-0.5">
-            <span className="text-[9px] font-mono uppercase tracking-wider text-slate-500">Isolated Population</span>
-            <span className="text-xs font-bold text-amber-300 font-mono">
+          <div className={`hidden sm:flex px-3 py-2 rounded-xl flex-col gap-0.5 ${hudItemBg}`}>
+            <span className={`text-[9px] font-mono uppercase tracking-wider ${hudLabel}`}>Isolated Population</span>
+            <span className={`text-xs font-bold font-mono ${isDark ? "text-amber-300" : "text-amber-700"}`}>
               {activeIsolatedPop.toLocaleString()}{" "}
-              <span className="text-[10px] text-slate-500 font-normal">/ {activeCutoffCount} villages</span>
+              <span className={`text-[10px] font-normal ${hudLabel}`}>/ {activeCutoffCount} villages</span>
             </span>
           </div>
 
-          <div className="hidden md:flex px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.06] flex-col gap-0.5">
-            <span className="text-[9px] font-mono uppercase tracking-wider text-slate-500">Staging Depots</span>
-            <span className="text-xs font-bold text-cyan-300 font-mono">
-              {depots.length} Bases <span className="text-[10px] text-slate-500 font-normal">Active</span>
+          <div className={`hidden md:flex px-3 py-2 rounded-xl flex-col gap-0.5 ${hudItemBg}`}>
+            <span className={`text-[9px] font-mono uppercase tracking-wider ${hudLabel}`}>Staging Depots</span>
+            <span className={`text-xs font-bold font-mono ${isDark ? "text-cyan-300" : "text-cyan-700"}`}>
+              {depots.length} Bases <span className={`text-[10px] font-normal ${hudLabel}`}>Active</span>
             </span>
           </div>
         </div>
 
         {/* Right Camera Presets */}
-        <div className="pointer-events-auto hidden lg:flex items-center gap-1 bg-slate-950/80 backdrop-blur-xl border border-white/10 p-1.5 rounded-2xl shadow-2xl text-xs font-mono">
+        <div className={`pointer-events-auto hidden lg:flex items-center gap-1 p-1.5 rounded-2xl text-xs font-mono ${presetContainerBg}`}>
           <button
             onClick={() => setCamera({ pos: RUDRAPRAYAG_CENTER, zoom: RUDRAPRAYAG_ZOOM })}
-            className="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer"
+            className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${presetBtn}`}
           >
             District
           </button>
           <button
             onClick={() => setCamera({ pos: [30.68, 79.06], zoom: 12 })}
-            className="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer"
+            className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${presetBtn}`}
           >
             Kedarnath Route
           </button>
           <button
             onClick={() => setCamera({ pos: [30.34, 78.98], zoom: 12 })}
-            className="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all cursor-pointer"
+            className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${presetBtn}`}
           >
             Tilwara Corridor
           </button>
@@ -252,14 +280,23 @@ export function CommandDeckPage({
       {/* 2. FULL-BLEED LEAFLET MAP CONTAINER */}
       <div className="relative flex-1 w-full h-full">
         <ReactMapContainer
+          key={isDark ? "deck-map-dark" : "deck-map-light"}
           center={RUDRAPRAYAG_CENTER}
           zoom={RUDRAPRAYAG_ZOOM}
           scrollWheelZoom={true}
-          className="w-full h-full z-0 bg-[#070a14]"
+          className={`w-full h-full z-0 ${isDark ? "bg-[#070a14]" : "bg-[#f1f5f9]"}`}
         >
           <ReactTileLayer
-            attribution='&copy; <a href="https://www.esri.com/">Esri</a> &mdash; World Dark Gray Base'
-            url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+            attribution={
+              isDark
+                ? '&copy; <a href="https://www.esri.com/">Esri</a> &mdash; World Dark Gray Base'
+                : '&copy; <a href="https://carto.com/">CARTO</a> &mdash; Positron Clean Map'
+            }
+            url={
+              isDark
+                ? "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+                : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+            }
             maxZoom={16}
           />
 
@@ -364,28 +401,44 @@ export function CommandDeckPage({
         </ReactMapContainer>
 
         {/* FLOATING MAP LEGEND (Bottom Left) */}
-        <div className="absolute bottom-24 left-4 z-10 glass-panel p-3 rounded-xl text-[11px] space-y-1.5 shadow-2xl max-w-xs pointer-events-auto">
-          <div className="font-semibold text-slate-300 text-[10px] uppercase tracking-wider flex justify-between items-center">
-            <span>Landslide Hazard Scale</span>
-            <span className="text-[9px] text-slate-400 font-mono">P(Blockage)</span>
+        <div
+          className={`absolute bottom-24 left-4 z-10 p-3 rounded-2xl text-[11px] space-y-1.5 pointer-events-auto backdrop-blur-xl transition-all ${
+            isDark
+              ? "bg-[#0a0f1e]/90 border border-white/[0.09] shadow-2xl text-slate-300"
+              : "bg-white/95 border-2 border-slate-900/10 shadow-xl text-slate-800"
+          }`}
+        >
+          <div className="font-semibold text-[10px] uppercase tracking-wider flex justify-between items-center">
+            <span className={isDark ? "text-slate-300 font-bold" : "text-slate-900 font-bold"}>
+              Landslide Hazard Scale
+            </span>
+            <span className={`text-[9px] font-mono ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+              P(Blockage)
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3.5 h-1.5 rounded-full bg-emerald-500" />
-            <span className="text-slate-300">&lt; 25% Operational (Low risk)</span>
+            <span className={isDark ? "text-slate-300" : "text-slate-700"}>&lt; 25% Operational (Low risk)</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3.5 h-1.5 rounded-full bg-amber-500" />
-            <span className="text-slate-300">25–45% Elevated Risk</span>
+            <span className={isDark ? "text-slate-300" : "text-slate-700"}>25–45% Elevated Risk</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3.5 h-1.5 rounded-full bg-orange-500" />
-            <span className="text-slate-300">45–60% Hazard Warning</span>
+            <span className={isDark ? "text-slate-300" : "text-slate-700"}>45–60% Hazard Warning</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3.5 h-1.5 rounded-full bg-red-500" />
-            <span className="text-red-400 font-semibold">&gt; 60% Critical Hazard / Severed</span>
+            <span className={isDark ? "text-red-400 font-semibold" : "text-red-600 font-bold"}>
+              &gt; 60% Critical / Severed
+            </span>
           </div>
-          <div className="border-t border-white/[0.08] pt-1.5 flex items-center justify-between text-[10px] text-slate-400">
+          <div
+            className={`border-t pt-1.5 flex items-center justify-between text-[10px] ${
+              isDark ? "border-white/[0.08] text-slate-400" : "border-slate-200 text-slate-600 font-medium"
+            }`}
+          >
             <span className="flex items-center gap-1">
               <span className="w-2.5 h-2.5 rounded bg-red-600 inline-block text-[9px] text-center text-white leading-none">
                 +
@@ -405,25 +458,61 @@ export function CommandDeckPage({
 
         {/* FLOATING CONTEXTUAL INSPECTION DRAWER (Right Slide-over) */}
         {drawerOpen && selectedSegmentData && (
-          <div className="absolute top-4 right-4 bottom-24 w-80 sm:w-88 z-20 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300"
-            style={{ background: 'rgba(8,13,27,0.92)', backdropFilter: 'blur(18px)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div
+            className="absolute top-4 right-4 bottom-24 w-80 sm:w-88 z-20 rounded-2xl flex flex-col overflow-hidden animate-in slide-in-from-right duration-300 transition-all"
+            style={
+              isDark
+                ? {
+                    background: "rgba(8,13,27,0.92)",
+                    backdropFilter: "blur(18px)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    boxShadow: "0 24px 48px rgba(0,0,0,0.5)",
+                  }
+                : {
+                    background: "rgba(255,255,255,0.97)",
+                    backdropFilter: "blur(18px)",
+                    border: "2px solid rgba(15,23,42,0.1)",
+                    boxShadow: "0 24px 48px rgba(0,0,0,0.12)",
+                  }
+            }
+          >
             <div className="flex-1 overflow-y-auto p-5 space-y-4">
               {/* Header */}
-              <div className="flex justify-between items-start pb-3 border-b border-white/[0.08]">
+              <div
+                className={`flex justify-between items-start pb-3 border-b ${
+                  isDark ? "border-white/[0.08]" : "border-slate-200"
+                }`}
+              >
                 <div>
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-mono text-[10px] px-2 py-0.5 rounded-lg bg-cyan-500/15 text-cyan-400 border border-cyan-500/25">
+                    <span
+                      className={`font-mono text-[10px] px-2 py-0.5 rounded-lg border font-bold ${
+                        isDark
+                          ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/25"
+                          : "bg-sky-100 text-[#0284c7] border-sky-300"
+                      }`}
+                    >
                       {selectedSegmentId}
                     </span>
-                    <h3 className="font-bold text-white text-sm leading-tight">{selectedSegmentData.name}</h3>
+                    <h3
+                      className={`font-bold text-sm leading-tight ${
+                        isDark ? "text-white" : "text-slate-900"
+                      }`}
+                    >
+                      {selectedSegmentData.name}
+                    </h3>
                   </div>
-                  <span className="text-[11px] text-slate-500 font-mono">
+                  <span className={`text-[11px] font-mono ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                     {selectedSegmentData.length_km} km · {selectedSegmentData.road_class}
                   </span>
                 </div>
                 <button
                   onClick={() => setDrawerOpen(false)}
-                  className="text-slate-500 hover:text-white p-1.5 rounded-lg hover:bg-white/[0.06] cursor-pointer transition-colors"
+                  className={`p-1.5 rounded-lg cursor-pointer transition-colors ${
+                    isDark
+                      ? "text-slate-400 hover:text-white hover:bg-white/[0.06]"
+                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                  }`}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -432,33 +521,78 @@ export function CommandDeckPage({
               {/* Probability Gauge */}
               <div className="space-y-2">
                 <div className="flex justify-between items-baseline">
-                  <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">Failure Probability</span>
+                  <span
+                    className={`text-[10px] font-mono uppercase tracking-wider ${
+                      isDark ? "text-slate-400" : "text-slate-500 font-bold"
+                    }`}
+                  >
+                    Failure Probability
+                  </span>
                   <span
                     className="text-2xl font-black font-mono"
-                    style={{ color: getProbabilityColor(selectedSegmentData.probability, selectedSegmentData.blocked) }}
+                    style={{
+                      color: getProbabilityColor(
+                        selectedSegmentData.probability,
+                        selectedSegmentData.blocked
+                      ),
+                    }}
                   >
                     {(selectedSegmentData.probability * 100).toFixed(1)}%
                   </span>
                 </div>
-                <div className="w-full bg-white/[0.05] h-2.5 rounded-full overflow-hidden">
+                <div
+                  className={`w-full h-2.5 rounded-full overflow-hidden ${
+                    isDark ? "bg-white/[0.06]" : "bg-slate-200"
+                  }`}
+                >
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{
                       width: `${Math.min(100, selectedSegmentData.probability * 100)}%`,
-                      backgroundColor: getProbabilityColor(selectedSegmentData.probability, selectedSegmentData.blocked),
+                      backgroundColor: getProbabilityColor(
+                        selectedSegmentData.probability,
+                        selectedSegmentData.blocked
+                      ),
                     }}
                   />
                 </div>
-                <div className={`text-[10px] font-bold font-mono px-2 py-0.5 rounded-lg border inline-block ${
-                  getProbabilityLabel(selectedSegmentData.probability, selectedSegmentData.blocked).badgeClass}`}>
-                  {getProbabilityLabel(selectedSegmentData.probability, selectedSegmentData.blocked).label}
+                <div
+                  className={`text-[10px] font-bold font-mono px-2 py-0.5 rounded-lg border inline-block ${
+                    getProbabilityLabel(
+                      selectedSegmentData.probability,
+                      selectedSegmentData.blocked
+                    ).badgeClass
+                  }`}
+                >
+                  {
+                    getProbabilityLabel(
+                      selectedSegmentData.probability,
+                      selectedSegmentData.blocked
+                    ).label
+                  }
                 </div>
               </div>
 
               {/* Diagnostic */}
-              <div className="p-3 rounded-xl bg-white/[0.04] border border-white/[0.06] space-y-1.5">
-                <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-wider">Diagnostic</span>
-                <p className="text-xs text-slate-300 leading-relaxed">
+              <div
+                className={`p-3 rounded-xl space-y-1.5 ${
+                  isDark
+                    ? "bg-white/[0.04] border border-white/[0.06]"
+                    : "bg-slate-50 border border-slate-200"
+                }`}
+              >
+                <span
+                  className={`text-[10px] font-mono uppercase tracking-wider font-bold ${
+                    isDark ? "text-cyan-400" : "text-[#0284c7]"
+                  }`}
+                >
+                  Diagnostic
+                </span>
+                <p
+                  className={`text-xs leading-relaxed ${
+                    isDark ? "text-slate-300" : "text-slate-700"
+                  }`}
+                >
                   {selectedSegmentData.reasons.explanation}
                 </p>
               </div>
@@ -466,12 +600,33 @@ export function CommandDeckPage({
               {/* Data rows */}
               <div className="space-y-1 text-xs font-mono">
                 {[
-                  { label: "Slope Steepness", value: `${selectedSegmentData.reasons.slope_gradient_pct}%`, color: "text-white" },
-                  { label: "Caine Critical Ratio", value: `${selectedSegmentData.reasons.intensity_ratio}×`, color: "text-cyan-300" },
-                  { label: "72h Antecedent Saturation", value: `${selectedSegmentData.reasons.antecedent_72h_mm} mm`, color: "text-emerald-300" },
+                  {
+                    label: "Slope Steepness",
+                    value: `${selectedSegmentData.reasons.slope_gradient_pct}%`,
+                    color: isDark ? "text-white" : "text-slate-900",
+                  },
+                  {
+                    label: "Caine Critical Ratio",
+                    value: `${selectedSegmentData.reasons.intensity_ratio}×`,
+                    color: isDark ? "text-cyan-300" : "text-sky-700 font-bold",
+                  },
+                  {
+                    label: "72h Antecedent Saturation",
+                    value: `${selectedSegmentData.reasons.antecedent_72h_mm} mm`,
+                    color: isDark ? "text-emerald-300" : "text-emerald-700 font-bold",
+                  },
                 ].map((row) => (
-                  <div key={row.label} className="flex justify-between py-2 px-3 bg-white/[0.03] rounded-xl">
-                    <span className="text-slate-400">{row.label}</span>
+                  <div
+                    key={row.label}
+                    className={`flex justify-between py-2 px-3 rounded-xl ${
+                      isDark
+                        ? "bg-white/[0.03]"
+                        : "bg-slate-100/70 border border-slate-200/50"
+                    }`}
+                  >
+                    <span className={isDark ? "text-slate-400" : "text-slate-600"}>
+                      {row.label}
+                    </span>
                     <span className={`font-bold ${row.color}`}>{row.value}</span>
                   </div>
                 ))}
@@ -479,28 +634,56 @@ export function CommandDeckPage({
 
               {/* ML Score */}
               {selectedSegmentData.reasons?.ml_probability !== undefined && (
-                <div className="p-3 rounded-xl bg-purple-950/30 border border-purple-800/30 space-y-1">
-                  <div className="flex justify-between text-[10px] font-mono text-purple-300">
+                <div
+                  className={`p-3 rounded-xl border space-y-1 ${
+                    isDark
+                      ? "bg-purple-950/30 border-purple-800/30"
+                      : "bg-purple-50 border-purple-200"
+                  }`}
+                >
+                  <div
+                    className={`flex justify-between text-[10px] font-mono ${
+                      isDark ? "text-purple-300" : "text-purple-700 font-bold"
+                    }`}
+                  >
                     <span>Random Forest ML</span>
-                    <b className="text-white">{(selectedSegmentData.reasons.ml_probability * 100).toFixed(1)}% Risk</b>
+                    <b className={isDark ? "text-white" : "text-purple-950"}>
+                      {(selectedSegmentData.reasons.ml_probability * 100).toFixed(1)}% Risk
+                    </b>
                   </div>
-                  <div className="text-[11px] text-slate-300">
+                  <div
+                    className={`text-[11px] ${
+                      isDark ? "text-slate-300" : "text-slate-700"
+                    }`}
+                  >
                     Class: <b>{selectedSegmentData.reasons.ml_hazard_class}</b>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="p-4 border-t border-white/[0.06] flex gap-2 shrink-0">
+            <div
+              className={`p-4 border-t flex gap-2 shrink-0 ${
+                isDark ? "border-white/[0.06]" : "border-slate-200 bg-slate-50/50"
+              }`}
+            >
               <button
                 onClick={() => onNavigate("intelligence")}
-                className="flex-1 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-xs font-bold text-slate-200 border border-white/10 transition-all cursor-pointer"
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  isDark
+                    ? "bg-white/[0.06] hover:bg-white/[0.1] text-slate-200 border border-white/10"
+                    : "bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 shadow-sm"
+                }`}
               >
                 Inspect in Lab
               </button>
               <button
                 onClick={() => onNavigate("dispatch")}
-                className="flex-1 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-xs font-bold text-slate-950 transition-all cursor-pointer"
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  isDark
+                    ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950"
+                    : "bg-slate-900 hover:bg-slate-800 text-white shadow-md"
+                }`}
               >
                 View Triage
               </button>
@@ -510,15 +693,25 @@ export function CommandDeckPage({
       </div>
 
       {/* 3. FLOATING BOTTOM 24-HOUR TIMELINE SCRUBBER DECK */}
-      <div className="h-20 bg-[#070b18]/95 backdrop-blur-xl border-t border-white/[0.07] px-4 sm:px-6 flex items-center justify-between gap-4 z-20 shrink-0">
+      <div
+        className={`h-20 backdrop-blur-xl px-4 sm:px-6 flex items-center justify-between gap-4 z-20 shrink-0 transition-colors ${
+          isDark
+            ? "bg-[#070b18]/95 border-t border-white/[0.07] text-white"
+            : "bg-white/95 border-t-2 border-slate-200/90 text-slate-900 shadow-[0_-4px_25px_rgba(0,0,0,0.06)]"
+        }`}
+      >
         {mode === "live" ? (
           <div className="flex-1 max-w-4xl mx-auto flex items-center gap-4">
             <button
               onClick={() => setIsPlaying(!isPlaying)}
               className={`p-2.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
                 isPlaying
-                  ? "bg-red-500/20 text-red-300 border-red-500/40"
-                  : "bg-cyan-500 hover:bg-cyan-400 text-slate-950 border-cyan-400 font-bold shadow-md shadow-cyan-500/20"
+                  ? isDark
+                    ? "bg-red-500/20 text-red-300 border-red-500/40"
+                    : "bg-red-100 text-red-700 border-red-300"
+                  : isDark
+                    ? "bg-cyan-500 hover:bg-cyan-400 text-slate-950 border-cyan-400 font-bold shadow-md shadow-cyan-500/20"
+                    : "bg-slate-900 hover:bg-slate-800 text-white border-slate-900 font-bold shadow-md"
               }`}
             >
               {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
@@ -527,13 +720,13 @@ export function CommandDeckPage({
 
             <div className="flex-1 space-y-1">
               <div className="flex justify-between items-center text-xs font-mono">
-                <span className="text-cyan-400 font-bold">
+                <span className={isDark ? "text-cyan-400 font-bold" : "text-[#0284c7] font-bold"}>
                   T+{currentHour}h: {currentHourStep?.time ? currentHourStep.time.slice(11, 16) : "Current"}
                 </span>
-                <span className="text-slate-400">
-                  Precip: <b className="text-white">{currentHourStep?.rainfall_mm || 0} mm/hr</b> • Blocked:{" "}
-                  <b className="text-red-400">{currentHourStep?.blocked_count || 0}</b> • Cut-off:{" "}
-                  <b className="text-amber-400">{currentHourStep?.isolated_population || 0}</b>
+                <span className={isDark ? "text-slate-400" : "text-slate-600"}>
+                  Precip: <b className={isDark ? "text-white" : "text-slate-900"}>{currentHourStep?.rainfall_mm || 0} mm/hr</b> • Blocked:{" "}
+                  <b className="text-red-500">{currentHourStep?.blocked_count || 0}</b> • Cut-off:{" "}
+                  <b className="text-amber-500">{currentHourStep?.isolated_population || 0}</b>
                 </span>
               </div>
 
@@ -547,9 +740,15 @@ export function CommandDeckPage({
                   setCurrentHour(Number(e.target.value));
                   setIsPlaying(false);
                 }}
-                className="w-full accent-cyan-400 cursor-pointer h-2 bg-slate-900 rounded-lg"
+                className={`w-full cursor-pointer h-2 rounded-lg ${
+                  isDark ? "accent-cyan-400 bg-slate-900" : "accent-slate-900 bg-slate-200"
+                }`}
               />
-              <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+              <div
+                className={`flex justify-between text-[10px] font-mono ${
+                  isDark ? "text-slate-500" : "text-slate-500 font-medium"
+                }`}
+              >
                 <span>T+0h (Now)</span>
                 <span>T+6h</span>
                 <span>T+12h</span>
@@ -561,11 +760,15 @@ export function CommandDeckPage({
         ) : (
           <div className="flex-1 max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+              <span
+                className={`text-xs font-bold flex items-center gap-1.5 ${
+                  isDark ? "text-amber-400" : "text-amber-700"
+                }`}
+              >
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 <span>Simulation Active:</span>
               </span>
-              <span className="font-mono text-xs text-white">
+              <span className={`font-mono text-xs ${isDark ? "text-white" : "text-slate-900 font-semibold"}`}>
                 {simRain} mm Rain • {simPrior1} mm P1 • {simPrior2} mm P2
               </span>
             </div>
@@ -573,7 +776,11 @@ export function CommandDeckPage({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => onNavigate("simulator")}
-                className="px-4 py-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold hover:bg-amber-500/30 transition-all cursor-pointer"
+                className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                  isDark
+                    ? "bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30"
+                    : "bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200 shadow-sm"
+                }`}
               >
                 Adjust Simulation Sliders
               </button>
