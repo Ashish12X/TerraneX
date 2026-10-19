@@ -78,7 +78,11 @@ export function OverviewPage({
         <div className="relative z-10 max-w-4xl mx-auto text-center space-y-6 sm:space-y-8 my-auto">
           {/* Hand-Drawn Brush Title */}
           <div className="space-y-1">
-            <h1 className="font-sketch text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-[#0f172a] leading-[1.08]">
+            <h1
+              className={`font-sketch text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-[1.08] transition-colors ${
+                isDark ? "text-white" : "text-[#0f172a]"
+              }`}
+            >
               Adaptive Landslide
               <br />
               Intelligence.
@@ -86,7 +90,11 @@ export function OverviewPage({
 
             {/* Autonomous Evacuation in vibrant blue with green brush stroke underline */}
             <div className="inline-block relative">
-              <span className="font-sketch text-4xl sm:text-6xl md:text-7xl font-bold text-[#0284c7] tracking-tight">
+              <span
+                className={`font-sketch text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight ${
+                  isDark ? "text-sky-400" : "text-[#0284c7]"
+                }`}
+              >
                 Autonomous Evacuation.
               </span>
               {/* Playful Green Hand-Drawn Underline SVG */}
@@ -134,10 +142,14 @@ export function OverviewPage({
               </div>
             </div>
 
-            {/* Secondary White Button: Simulate Cloudburst */}
+            {/* Secondary Button: Simulate Cloudburst */}
             <button
               onClick={() => onNavigate("simulator")}
-              className="px-7 py-3.5 rounded-full bg-white text-[#0f172a] border border-[#cbd5e1] shadow-[0_2px_8px_rgba(0,0,0,0.04)] font-sketch text-base sm:text-lg font-semibold flex items-center gap-2 hover:bg-slate-50 hover:border-slate-400 active:scale-[0.98] transition-all cursor-pointer"
+              className={`px-7 py-3.5 rounded-full font-sketch text-base sm:text-lg font-semibold flex items-center gap-2 active:scale-[0.98] transition-all cursor-pointer ${
+                isDark
+                  ? "bg-[#111827] text-white border border-white/10 shadow-[0_2px_12px_rgba(0,0,0,0.3)] hover:bg-[#1e293b]"
+                  : "bg-white text-[#0f172a] border border-[#cbd5e1] shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:bg-slate-50"
+              }`}
             >
               <div className="relative">
                 <CloudRain className="w-5 h-5 text-amber-500" />
@@ -148,17 +160,39 @@ export function OverviewPage({
           </div>
         </div>
 
-        {/* Bottom 4 Feature Cards (Exact Reference Match) */}
+        {/* Bottom 4 Feature Cards */}
         <div className="relative z-10 w-full max-w-6xl mx-auto pt-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {/* Card 1: Telemetry */}
-            <div className="bg-white/95 backdrop-blur-sm border border-slate-200/90 rounded-2xl p-4 shadow-sm flex items-center gap-3.5 hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 rounded-full bg-[#f0f9ff] text-[#0284c7] flex items-center justify-center shrink-0 border border-[#bae6fd]/60">
+            <div
+              className={`backdrop-blur-sm rounded-2xl p-4 shadow-sm flex items-center gap-3.5 transition-all ${
+                isDark
+                  ? "bg-[#111827]/90 border border-white/[0.08]"
+                  : "bg-white/95 border border-slate-200/90 hover:shadow-md"
+              }`}
+            >
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 border ${
+                  isDark
+                    ? "bg-sky-950/60 text-sky-400 border-sky-800/60"
+                    : "bg-[#f0f9ff] text-[#0284c7] border-[#bae6fd]/60"
+                }`}
+              >
                 <Radio className="w-6 h-6" />
               </div>
               <div className="space-y-0.5">
-                <div className="font-sketch text-slate-500 text-sm font-semibold">Telemetry</div>
-                <div className="font-sketch text-slate-900 text-lg font-bold flex items-center gap-1.5">
+                <div
+                  className={`font-sketch text-sm font-semibold ${
+                    isDark ? "text-slate-400" : "text-slate-500"
+                  }`}
+                >
+                  Telemetry
+                </div>
+                <div
+                  className={`font-sketch text-lg font-bold flex items-center gap-1.5 ${
+                    isDark ? "text-white" : "text-slate-900"
+                  }`}
+                >
                   <span className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse inline-block" />
                   <span>Live</span>
                 </div>
@@ -166,39 +200,101 @@ export function OverviewPage({
             </div>
 
             {/* Card 2: ML Accuracy */}
-            <div className="bg-white/95 backdrop-blur-sm border border-slate-200/90 rounded-2xl p-4 shadow-sm flex items-center gap-3.5 hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 rounded-full bg-[#ecfdf5] text-[#059669] flex items-center justify-center shrink-0 border border-[#a7f3d0]/60">
+            <div
+              className={`backdrop-blur-sm rounded-2xl p-4 shadow-sm flex items-center gap-3.5 transition-all ${
+                isDark
+                  ? "bg-[#111827]/90 border border-white/[0.08]"
+                  : "bg-white/95 border border-slate-200/90 hover:shadow-md"
+              }`}
+            >
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 border ${
+                  isDark
+                    ? "bg-emerald-950/60 text-emerald-400 border-emerald-800/60"
+                    : "bg-[#ecfdf5] text-[#059669] border-[#a7f3d0]/60"
+                }`}
+              >
                 <Cpu className="w-6 h-6" />
               </div>
               <div className="space-y-0.5">
-                <div className="font-sketch text-slate-500 text-sm font-semibold">ML Accuracy</div>
-                <div className="font-sketch text-[#059669] text-lg font-bold">
+                <div
+                  className={`font-sketch text-sm font-semibold ${
+                    isDark ? "text-slate-400" : "text-slate-500"
+                  }`}
+                >
+                  ML Accuracy
+                </div>
+                <div className="font-sketch text-[#10b981] text-lg font-bold">
                   91.37%
                 </div>
               </div>
             </div>
 
             {/* Card 3: Active Corridors */}
-            <div className="bg-white/95 backdrop-blur-sm border border-slate-200/90 rounded-2xl p-4 shadow-sm flex items-center gap-3.5 hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 rounded-full bg-[#fef2f2] text-[#ef4444] flex items-center justify-center shrink-0 border border-[#fecaca]/60">
+            <div
+              className={`backdrop-blur-sm rounded-2xl p-4 shadow-sm flex items-center gap-3.5 transition-all ${
+                isDark
+                  ? "bg-[#111827]/90 border border-white/[0.08]"
+                  : "bg-white/95 border border-slate-200/90 hover:shadow-md"
+              }`}
+            >
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 border ${
+                  isDark
+                    ? "bg-red-950/60 text-red-400 border-red-800/60"
+                    : "bg-[#fef2f2] text-[#ef4444] border-[#fecaca]/60"
+                }`}
+              >
                 <AlertTriangle className="w-6 h-6" />
               </div>
               <div className="space-y-0.5">
-                <div className="font-sketch text-slate-500 text-sm font-semibold">Active Corridors</div>
-                <div className="font-sketch text-slate-900 text-lg font-bold">
+                <div
+                  className={`font-sketch text-sm font-semibold ${
+                    isDark ? "text-slate-400" : "text-slate-500"
+                  }`}
+                >
+                  Active Corridors
+                </div>
+                <div
+                  className={`font-sketch text-lg font-bold ${
+                    isDark ? "text-white" : "text-slate-900"
+                  }`}
+                >
                   12
                 </div>
               </div>
             </div>
 
             {/* Card 4: Staging Depots */}
-            <div className="bg-white/95 backdrop-blur-sm border border-slate-200/90 rounded-2xl p-4 shadow-sm flex items-center gap-3.5 hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 rounded-full bg-[#fefce8] text-[#ca8a04] flex items-center justify-center shrink-0 border border-[#fef08a]/60">
+            <div
+              className={`backdrop-blur-sm rounded-2xl p-4 shadow-sm flex items-center gap-3.5 transition-all ${
+                isDark
+                  ? "bg-[#111827]/90 border border-white/[0.08]"
+                  : "bg-white/95 border border-slate-200/90 hover:shadow-md"
+              }`}
+            >
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 border ${
+                  isDark
+                    ? "bg-amber-950/60 text-amber-400 border-amber-800/60"
+                    : "bg-[#fefce8] text-[#ca8a04] border-[#fef08a]/60"
+                }`}
+              >
                 <Shield className="w-6 h-6" />
               </div>
               <div className="space-y-0.5">
-                <div className="font-sketch text-slate-500 text-sm font-semibold">Staging Depots</div>
-                <div className="font-sketch text-[#ca8a04] text-lg font-bold">
+                <div
+                  className={`font-sketch text-sm font-semibold ${
+                    isDark ? "text-slate-400" : "text-slate-500"
+                  }`}
+                >
+                  Staging Depots
+                </div>
+                <div
+                  className={`font-sketch text-lg font-bold ${
+                    isDark ? "text-amber-400" : "text-[#ca8a04]"
+                  }`}
+                >
                   {depots?.length || 6} Ready
                 </div>
               </div>
@@ -207,18 +303,36 @@ export function OverviewPage({
         </div>
       </section>
 
-      {/* 2. REFINED MINIMALIST SUPPORTING SECTION (Matching Sketch Editorial Style) */}
-      <section className="py-16 px-6 lg:px-12 bg-white border-t border-slate-200/80">
+      {/* 2. REFINED MINIMALIST SUPPORTING SECTION */}
+      <section
+        className={`py-16 px-6 lg:px-12 border-t transition-colors ${
+          isDark
+            ? "bg-[#070b14] border-white/[0.08]"
+            : "bg-white border-slate-200/80"
+        }`}
+      >
         <div className="max-w-6xl mx-auto space-y-12">
           {/* Section Header */}
           <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="font-sketch text-sm uppercase tracking-wider text-[#0284c7] font-bold">
+            <span
+              className={`font-sketch text-sm uppercase tracking-wider font-bold ${
+                isDark ? "text-sky-400" : "text-[#0284c7]"
+              }`}
+            >
               Engineering Architecture
             </span>
-            <h2 className="font-sketch text-3xl sm:text-4xl font-bold text-slate-900">
+            <h2
+              className={`font-sketch text-3xl sm:text-4xl font-bold ${
+                isDark ? "text-white" : "text-slate-900"
+              }`}
+            >
               How Terranex Operates in the Garhwal Himalayas
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600">
+            <p
+              className={`text-xs sm:text-sm ${
+                isDark ? "text-slate-400" : "text-slate-600"
+              }`}
+            >
               Transforming raw weather telemetry and terrain digital elevation models into explainable geotechnical risk and autonomous rescue routes.
             </p>
           </div>
@@ -226,22 +340,51 @@ export function OverviewPage({
           {/* 3 Clean Editorial Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Box 1 */}
-            <div className="bg-[#f8fafc] border border-slate-200/80 rounded-2xl p-6 space-y-4 hover:border-slate-300 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[#0284c7] font-sketch font-bold text-lg shadow-sm">
+            <div
+              className={`rounded-2xl p-6 space-y-4 border transition-all ${
+                isDark
+                  ? "bg-[#111827] border-white/[0.08] hover:border-white/20"
+                  : "bg-[#f8fafc] border-slate-200/80 hover:border-slate-300"
+              }`}
+            >
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center font-sketch font-bold text-lg shadow-sm border ${
+                  isDark
+                    ? "bg-white/[0.06] border-white/10 text-sky-400"
+                    : "bg-white border-slate-200 text-[#0284c7]"
+                }`}
+              >
                 1
               </div>
               <div className="space-y-1.5">
-                <h3 className="font-sketch text-xl font-bold text-slate-900">
+                <h3
+                  className={`font-sketch text-xl font-bold ${
+                    isDark ? "text-white" : "text-slate-900"
+                  }`}
+                >
                   Caine (1980) Physics Threshold
                 </h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Calculates precipitation threshold: <code className="bg-slate-200 px-1 py-0.5 rounded font-mono text-[11px] text-slate-800">I_c = 14.82 × D^(-0.39)</code>.
-                  Every road segment compares live precipitation against critical initiation levels.
+                <p
+                  className={`text-xs leading-relaxed ${
+                    isDark ? "text-slate-400" : "text-slate-600"
+                  }`}
+                >
+                  Calculates precipitation threshold:{" "}
+                  <code
+                    className={`px-1 py-0.5 rounded font-mono text-[11px] ${
+                      isDark ? "bg-white/[0.08] text-cyan-300" : "bg-slate-200 text-slate-800"
+                    }`}
+                  >
+                    I_c = 14.82 × D^(-0.39)
+                  </code>
+                  . Every road segment compares live precipitation against critical initiation levels.
                 </p>
               </div>
               <button
                 onClick={() => onNavigate("intelligence")}
-                className="text-xs font-sketch font-bold text-[#0284c7] hover:text-[#0369a1] flex items-center gap-1 cursor-pointer"
+                className={`text-xs font-sketch font-bold flex items-center gap-1 cursor-pointer ${
+                  isDark ? "text-sky-400 hover:text-sky-300" : "text-[#0284c7] hover:text-[#0369a1]"
+                }`}
               >
                 <span>Inspect in Intelligence Lab</span>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -249,22 +392,44 @@ export function OverviewPage({
             </div>
 
             {/* Box 2 */}
-            <div className="bg-[#f8fafc] border border-slate-200/80 rounded-2xl p-6 space-y-4 hover:border-slate-300 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[#059669] font-sketch font-bold text-lg shadow-sm">
+            <div
+              className={`rounded-2xl p-6 space-y-4 border transition-all ${
+                isDark
+                  ? "bg-[#111827] border-white/[0.08] hover:border-white/20"
+                  : "bg-[#f8fafc] border-slate-200/80 hover:border-slate-300"
+              }`}
+            >
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center font-sketch font-bold text-lg shadow-sm border ${
+                  isDark
+                    ? "bg-white/[0.06] border-white/10 text-emerald-400"
+                    : "bg-white border-slate-200 text-[#059669]"
+                }`}
+              >
                 2
               </div>
               <div className="space-y-1.5">
-                <h3 className="font-sketch text-xl font-bold text-slate-900">
+                <h3
+                  className={`font-sketch text-xl font-bold ${
+                    isDark ? "text-white" : "text-slate-900"
+                  }`}
+                >
                   Supervised Random Forest ML
                 </h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p
+                  className={`text-xs leading-relaxed ${
+                    isDark ? "text-slate-400" : "text-slate-600"
+                  }`}
+                >
                   Trained on steep Himalayan DEM elevation gradients and monsoonal historical landslides.
                   Verified accuracy of <b>91.37%</b> with ROC-AUC <b>0.973</b>.
                 </p>
               </div>
               <button
                 onClick={() => onNavigate("command")}
-                className="text-xs font-sketch font-bold text-[#059669] hover:text-[#047857] flex items-center gap-1 cursor-pointer"
+                className={`text-xs font-sketch font-bold flex items-center gap-1 cursor-pointer ${
+                  isDark ? "text-emerald-400 hover:text-emerald-300" : "text-[#059669] hover:text-[#047857]"
+                }`}
               >
                 <span>View On Map Deck</span>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -272,21 +437,43 @@ export function OverviewPage({
             </div>
 
             {/* Box 3 */}
-            <div className="bg-[#f8fafc] border border-slate-200/80 rounded-2xl p-6 space-y-4 hover:border-slate-300 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[#ca8a04] font-sketch font-bold text-lg shadow-sm">
+            <div
+              className={`rounded-2xl p-6 space-y-4 border transition-all ${
+                isDark
+                  ? "bg-[#111827] border-white/[0.08] hover:border-white/20"
+                  : "bg-[#f8fafc] border-slate-200/80 hover:border-slate-300"
+              }`}
+            >
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center font-sketch font-bold text-lg shadow-sm border ${
+                  isDark
+                    ? "bg-white/[0.06] border-white/10 text-amber-400"
+                    : "bg-white border-slate-200 text-[#ca8a04]"
+                }`}
+              >
                 3
               </div>
               <div className="space-y-1.5">
-                <h3 className="font-sketch text-xl font-bold text-slate-900">
+                <h3
+                  className={`font-sketch text-xl font-bold ${
+                    isDark ? "text-white" : "text-slate-900"
+                  }`}
+                >
                   3-Way Multimodal Evacuation
                 </h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p
+                  className={`text-xs leading-relaxed ${
+                    isDark ? "text-slate-400" : "text-slate-600"
+                  }`}
+                >
                   When roads sever, the system automatically checks (A) Surface Detour, (B) PWD Heavy Excavator Clearance ETA, and (C) Helicopter Airlift Escalation.
                 </p>
               </div>
               <button
                 onClick={() => onNavigate("dispatch")}
-                className="text-xs font-sketch font-bold text-[#ca8a04] hover:text-[#a16207] flex items-center gap-1 cursor-pointer"
+                className={`text-xs font-sketch font-bold flex items-center gap-1 cursor-pointer ${
+                  isDark ? "text-amber-400 hover:text-amber-300" : "text-[#ca8a04] hover:text-[#a16207]"
+                }`}
               >
                 <span>Open Dispatch Hub</span>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -297,9 +484,19 @@ export function OverviewPage({
       </section>
 
       {/* 3. MINIMAL CLEAN FOOTER */}
-      <footer className="py-8 px-6 text-center text-xs text-slate-500 font-sketch border-t border-slate-200">
+      <footer
+        className={`py-8 px-6 text-center text-xs font-sketch border-t transition-colors ${
+          isDark
+            ? "bg-[#060a12] border-white/[0.08] text-slate-500"
+            : "bg-white border-slate-200 text-slate-500"
+        }`}
+      >
         <p>TERRANEX — ADAPTIVE LANDSLIDE INTELLIGENCE &amp; EVACUATION DECK</p>
-        <p className="text-[11px] text-slate-400 mt-0.5">
+        <p
+          className={`text-[11px] mt-0.5 ${
+            isDark ? "text-slate-600" : "text-slate-400"
+          }`}
+        >
           Rudraprayag District • Garhwal Himalayas • Innotech 2026
         </p>
       </footer>
