@@ -4,17 +4,76 @@ import {
   Activity,
   Mountain,
   CloudRain,
-  ShieldCheck,
-  Zap,
-  Sliders,
   CheckCircle2,
   AlertTriangle,
-  Layers,
   ArrowRight,
+  SlidersHorizontal,
+  Zap,
   Info,
+  BarChart2,
+  Brain,
 } from "lucide-react";
 import { api } from "../services/api";
 
+// Hero image path (generated sketch illustration)
+const BRAIN_SKETCH = "C:/Users/Smart-tech/.gemini/antigravity-ide/brain/307ccffe-2b56-4bd6-960b-74a92e6f6c94/sketch_intelligence_banner_1792444417236.jpg";
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+function SketchSlider({ label, value, min, max, step = 1, onChange, unit = "", colorClass = "bg-sky-400" }) {
+  const pct = ((value - min) / (max - min)) * 100;
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium text-slate-600">{label}</span>
+        <span className="font-mono text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-lg">
+          {value}{unit}
+        </span>
+      </div>
+      <div className="relative h-[5px] bg-slate-200 rounded-full">
+        <div className={`h-full rounded-full transition-all ${colorClass}`} style={{ width: `${pct}%` }} />
+        <input
+          type="range" min={min} max={max} step={step} value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className="absolute inset-0 opacity-0 w-full cursor-pointer"
+          style={{ height: "5px" }}
+        />
+        <div
+          className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-sky-400 shadow-sm pointer-events-none"
+          style={{ left: `calc(${pct}% - 8px)` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function RiskBar({ label, value }) {
+  const pct = (value * 100).toFixed(0);
+  const color = value >= 0.7 ? "bg-red-400" : value >= 0.4 ? "bg-amber-400" : "bg-green-400";
+  const textColor = value >= 0.7 ? "text-red-600" : value >= 0.4 ? "text-amber-600" : "text-green-600";
+  return (
+    <div className="space-y-1">
+      <div className="flex justify-between items-center">
+        <span className="text-xs text-slate-600 font-medium">{label}</span>
+        <span className={`font-mono text-xs font-bold ${textColor}`}>{pct}%</span>
+      </div>
+      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+        <div className={`h-full rounded-full transition-all duration-500 ${color}`} style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function MetricPill({ label, value, sub, colorClass = "bg-slate-100 text-slate-700" }) {
+  return (
+    <div className={`rounded-2xl p-4 ${colorClass}`}>
+      <div className="text-2xl font-sketch font-bold">{value}</div>
+      <div className="text-xs font-semibold mt-0.5">{label}</div>
+      {sub && <div className="text-[10px] opacity-60 mt-0.5">{sub}</div>}
+    </div>
+  );
+}
+
+// ── Main Component ────────────────────────────────────────────────────────────
 export function IntelligenceLabPage({ network, onNavigate }) {
   const [selectedEdgeId, setSelectedEdgeId] = useState("E06");
   const [edgeData, setEdgeData] = useState(null);
@@ -24,405 +83,251 @@ export function IntelligenceLabPage({ network, onNavigate }) {
   const [prior2, setPrior2] = useState(10);
   const [loading, setLoading] = useState(false);
 
-  // ML Test Bench state
   const [customSlope, setCustomSlope] = useState(55);
   const [customRain, setCustomRain] = useState(70);
   const [customAntecedent, setCustomAntecedent] = useState(20);
   const [mlInferenceResult, setMlInferenceResult] = useState(null);
+  const [mlLoading, setMlLoading] = useState(false);
 
-  // Fetch segment risk data
   useEffect(() => {
     if (!selectedEdgeId) return;
     setLoading(true);
-    api
-      .getSegmentRisk(selectedEdgeId, {
-        rainfall: rainfallMm,
-        prior1: prior1,
-        prior2: prior2,
-        threshold: 0.5,
-      })
-      .then((data) => {
-        setEdgeData(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Segment risk load error:", err);
-        setLoading(false);
-      });
+    api.getSegmentRisk(selectedEdgeId, {
+      rainfall: rainfallMm, prior1, prior2, threshold: 0.5,
+    }).then((data) => { setEdgeData(data); setLoading(false); })
+      .catch(() => setLoading(false));
   }, [selectedEdgeId, rainfallMm, prior1, prior2]);
 
-  // Run direct ML inference
   const handleRunMLInference = async () => {
     try {
+      setMlLoading(true);
       const caineThreshold = 14.82 * Math.pow(durationHours, -0.39);
       const caineRatio = customRain / caineThreshold;
       const res = await api.predictML({
         mean_gradient_pct: customSlope,
-        max_gradient_pct: Math.min(100, customSlope + 10),
-        hourly_rainfall_mm: customRain,
-        caine_threshold_mm_hr: caineThreshold.toFixed(2),
-        caine_ratio: caineRatio.toFixed(3),
-        antecedent_72h_mm: customAntecedent,
-        elevation_m: 1800,
-        geotechnical_susc: 0.55,
+        antecedent_rain_7d: customAntecedent,
+        antecedent_rain_30d: customAntecedent * 2.8,
+        caine_ratio: caineRatio,
+        peak_intensity_mm_hr: customRain / durationHours,
       });
       setMlInferenceResult(res);
-    } catch (err) {
-      console.warn("ML predict error:", err);
-    }
+    } catch (e) { console.error(e); }
+    finally { setMlLoading(false); }
   };
 
-  // Run initial test inference
-  useEffect(() => {
-    handleRunMLInference();
-  }, [customSlope, customRain, customAntecedent, durationHours]);
-
-  // Caine Threshold for slider duration
-  const calculatedCaineThreshold = (14.82 * Math.pow(durationHours, -0.39)).toFixed(2);
-
-  // Feature Importance data
-  const featureImportances = [
-    { name: "Hourly Rainfall Intensity", weight: 23.49, code: "hourly_rainfall_mm", color: "bg-cyan-500" },
-    { name: "Caine Intensity Ratio (Rain/Ic)", weight: 19.78, code: "caine_ratio", color: "bg-cyan-400" },
-    { name: "Mean Terrain Gradient (%)", weight: 18.86, code: "mean_gradient_pct", color: "bg-amber-500" },
-    { name: "Peak Terrain Gradient (%)", weight: 17.84, code: "max_gradient_pct", color: "bg-amber-400" },
-    { name: "Geotechnical Susceptibility", weight: 9.29, code: "geotechnical_susc", color: "bg-purple-500" },
-    { name: "72-Hour Decayed Soil Moisture", weight: 7.32, code: "antecedent_72h_mm", color: "bg-emerald-500" },
-    { name: "Mean Elevation ASL (m)", weight: 2.42, code: "elevation_m", color: "bg-slate-400" },
-    { name: "Caine Threshold Baseline", weight: 1.00, code: "caine_threshold_mm_hr", color: "bg-slate-500" },
-  ];
+  const edges = network?.edges || [];
+  const edgeRisk = edgeData?.risk;
 
   return (
-    <div className="min-h-screen bg-[#050811] text-slate-100 p-6 lg:p-10 space-y-10 max-w-7xl mx-auto">
-      {/* 1. PAGE HEADER */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/[0.08] pb-8">
-        <div className="space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-mono text-xs">
-            <Cpu className="w-3.5 h-3.5" />
-            <span>GEOTECHNICAL INTELLIGENCE LAB • XAI BENCH</span>
-          </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
-            Physics-Informed Machine Learning.
-          </h1>
-          <p className="text-sm sm:text-base text-slate-400 max-w-2xl">
-            Bridging empirical mass-wasting geotechnical physics with ensemble Random Forest classifiers.
-            Zero black-box predictions; transparent attribution down to soil moisture and slope degrees.
-          </p>
-        </div>
+    <div className="sk-page min-h-screen p-5 lg:p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
 
-        {/* Model Metrics Card */}
-        <div className="glass-panel p-4 rounded-xl border-white/10 shrink-0 space-y-2 text-right">
-          <div className="text-[10px] uppercase font-mono text-slate-400">Random Forest Ensemble</div>
-          <div className="text-2xl font-extrabold text-cyan-300 font-mono">91.37% Accuracy</div>
-          <div className="flex items-center justify-end gap-3 text-xs font-mono text-slate-400">
-            <span>ROC-AUC: <b className="text-white">0.973</b></span>
-            <span>•</span>
-            <span>Precision: <b className="text-emerald-400">93.2%</b></span>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. CORRIDOR SELECTION STRIP */}
-      <div className="space-y-3">
-        <div className="flex justify-between items-center">
-          <span className="text-xs font-mono uppercase tracking-wider text-slate-400">
-            Select Road Corridor for Geotechnical Inspection
-          </span>
-          <span className="text-xs font-mono text-cyan-400">
-            12 Himalayan Corridors Monitored
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
-          {network?.edges?.map((edge) => {
-            const isSelected = selectedEdgeId === edge.id;
-            return (
-              <button
-                key={edge.id}
-                onClick={() => setSelectedEdgeId(edge.id)}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                  isSelected
-                    ? "bg-cyan-500/15 border-cyan-500/50 shadow-md shadow-cyan-950/50"
-                    : "glass-panel-subtle hover:border-white/20"
-                }`}
-              >
-                <div className="flex justify-between items-center">
-                  <span className={`font-mono text-xs font-bold ${isSelected ? "text-cyan-300" : "text-white"}`}>
-                    {edge.id}
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-mono">{edge.length_km}km</span>
-                </div>
-                <div className="text-xs font-semibold text-slate-200 mt-1 truncate">
-                  {edge.name || `${edge.from} → ${edge.to}`}
-                </div>
-                <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                  Slope: {edge.mean_gradient_pct || edge.max_gradient_pct}%
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* 3. LIVE CORRIDOR EXPLAINABILITY CARD */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Caine 1980 Equation & Active Parameters */}
-        <div className="glass-panel p-6 rounded-2xl space-y-6 lg:col-span-2">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
-            <div>
-              <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-wider">Active Corridor</span>
-              <h3 className="text-xl font-bold text-white">
-                {edgeData?.name || selectedEdgeId}
-              </h3>
-              <p className="text-xs text-slate-400">
-                Road Class: {edgeData?.road_class || "Highway"} • Length: {edgeData?.length_km || 0} km
+        {/* ── HEADER ──────────────────────────────────────────────────── */}
+        <div className="sk-card overflow-hidden">
+          <div className="flex flex-col md:flex-row gap-6 p-6">
+            <div className="flex-1 space-y-3">
+              <div className="sk-section-label">
+                <Cpu className="w-3.5 h-3.5 text-purple-500" />
+                Intelligence Lab · Bayesian + ML Engine
+              </div>
+              <h1 className="font-sketch text-4xl lg:text-5xl font-bold text-slate-900 leading-tight">
+                Risk Intelligence
+              </h1>
+              <p className="text-sm text-slate-500 max-w-lg">
+                Per-segment probabilistic risk using a Bayesian belief network fused with a
+                Random Forest landslide classifier. Select a corridor to inspect deep inference.
               </p>
+              <button
+                onClick={() => onNavigate("command")}
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-slate-900 rounded-xl hover:bg-slate-700 transition-all mt-1"
+              >
+                View Live Map <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            {/* Sketch illustration */}
+            <div className="hidden md:block w-64 shrink-0">
+              <img
+                src={BRAIN_SKETCH}
+                alt="Intelligence sketch"
+                className="w-full h-40 object-contain object-center opacity-85 mix-blend-multiply"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ── 3-COLUMN METRIC STRIP ────────────────────────────────── */}
+        {edgeData && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <MetricPill
+              label="Landslide Risk"
+              value={edgeRisk != null ? `${(edgeRisk * 100).toFixed(0)}%` : "—"}
+              sub="Bayesian posterior"
+              colorClass={
+                edgeRisk >= 0.7 ? "bg-red-50 text-red-700 border border-red-100"
+                : edgeRisk >= 0.4 ? "bg-amber-50 text-amber-700 border border-amber-100"
+                : "bg-green-50 text-green-700 border border-green-100"
+              }
+            />
+            <MetricPill
+              label="Slope Grade"
+              value={edgeData.slope_pct != null ? `${edgeData.slope_pct}%` : "—"}
+              sub="Mean gradient"
+              colorClass="bg-sky-50 text-sky-700 border border-sky-100"
+            />
+            <MetricPill
+              label="Rainfall"
+              value={`${rainfallMm} mm`}
+              sub="Current scenario"
+              colorClass="bg-purple-50 text-purple-700 border border-purple-100"
+            />
+            <MetricPill
+              label="Cainé Ratio"
+              value={edgeData.caine_ratio != null ? edgeData.caine_ratio.toFixed(2) : "—"}
+              sub="vs. threshold"
+              colorClass="bg-slate-50 text-slate-700 border border-slate-100"
+            />
+          </div>
+        )}
+
+        {/* ── MAIN GRID ────────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] gap-5">
+
+          {/* LEFT — Segment Selector + Sliders */}
+          <div className="space-y-5">
+
+            {/* Edge Selector */}
+            <div className="sk-card p-5">
+              <div className="sk-section-label">
+                <Mountain className="w-3.5 h-3.5 text-slate-500" />
+                Road Corridor
+              </div>
+              <div className="mt-2 grid grid-cols-3 gap-1.5">
+                {(edges.length > 0 ? edges : ["E01","E02","E03","E04","E05","E06","E07","E08","E09"].map((id) => ({ id }))).map((e) => (
+                  <button
+                    key={e.id}
+                    onClick={() => setSelectedEdgeId(e.id)}
+                    className={`py-1.5 rounded-xl text-xs font-mono font-bold transition-all border
+                      ${selectedEdgeId === e.id
+                        ? "bg-slate-900 text-white border-slate-900"
+                        : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"}`}
+                  >
+                    {e.id}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {edgeData && (
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <div className="text-[10px] font-mono text-slate-400">Failure Probability</div>
-                  <div className="text-2xl font-black font-mono" style={{ color: edgeData.blocked ? "#ef4444" : "#10b981" }}>
-                    {(edgeData.probability * 100).toFixed(1)}%
+            {/* Input Sliders */}
+            <div className="sk-card p-5 space-y-4">
+              <div className="sk-section-label">
+                <CloudRain className="w-3.5 h-3.5 text-sky-500" />
+                Rainfall Parameters
+              </div>
+              <SketchSlider label="Rainfall (mm)" value={rainfallMm} min={0} max={200} step={5}
+                unit=" mm" onChange={setRainfallMm} colorClass="bg-sky-400" />
+              <SketchSlider label="Prior 7-day (mm)" value={prior1} min={0} max={60}
+                unit=" mm" onChange={setPrior1} colorClass="bg-green-400" />
+              <SketchSlider label="Prior 30-day (mm)" value={prior2} min={0} max={80}
+                unit=" mm" onChange={setPrior2} colorClass="bg-amber-400" />
+            </div>
+          </div>
+
+          {/* RIGHT — Segment details + ML Bench */}
+          <div className="space-y-5">
+
+            {/* Segment Risk Detail */}
+            <div className="sk-card p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="sk-section-label mb-0">
+                  <Activity className="w-3.5 h-3.5 text-sky-500" />
+                  Segment Risk Analysis — {selectedEdgeId}
+                </div>
+                {loading && (
+                  <span className="text-xs text-slate-400 animate-pulse font-mono">Computing…</span>
+                )}
+              </div>
+
+              {edgeData ? (
+                <div className="space-y-3">
+                  <RiskBar label="Landslide Probability" value={edgeData.risk ?? 0} />
+                  <RiskBar label="Cainé Exceedance" value={Math.min(1, (edgeData.caine_ratio ?? 0) / 3)} />
+                  {edgeData.bayesian_factors && Object.entries(edgeData.bayesian_factors).map(([k, v]) => (
+                    <RiskBar key={k} label={k.replace(/_/g, " ")} value={typeof v === "number" ? v : 0} />
+                  ))}
+                  {/* Feature table */}
+                  {edgeData.features && (
+                    <div className="mt-4 pt-4 border-t border-slate-100">
+                      <div className="sk-section-label mb-2">
+                        <Info className="w-3.5 h-3.5" />
+                        Physical Features
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {Object.entries(edgeData.features).slice(0, 6).map(([k, v]) => (
+                          <div key={k} className="bg-slate-50 rounded-xl px-3 py-2">
+                            <div className="text-[10px] text-slate-400 font-mono">{k}</div>
+                            <div className="text-sm font-bold text-slate-800 mt-0.5">
+                              {typeof v === "number" ? v.toFixed(2) : String(v)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="py-12 text-center font-sketch text-slate-400">
+                  {loading ? "Loading segment data…" : "Select a corridor to analyse"}
+                </div>
+              )}
+            </div>
+
+            {/* ML Direct Inference Bench */}
+            <div className="sk-card p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="sk-section-label mb-0">
+                  <Brain className="w-3.5 h-3.5 text-purple-500" />
+                  ML Direct Inference Bench
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                <SketchSlider label="Slope (%)" value={customSlope} min={5} max={90}
+                  onChange={setCustomSlope} colorClass="bg-purple-400" />
+                <SketchSlider label="Rainfall (mm)" value={customRain} min={0} max={200} step={5}
+                  unit=" mm" onChange={setCustomRain} colorClass="bg-sky-400" />
+                <SketchSlider label="Antecedent (7d)" value={customAntecedent} min={0} max={60}
+                  unit=" mm" onChange={setCustomAntecedent} colorClass="bg-green-400" />
+              </div>
+              <button
+                onClick={handleRunMLInference}
+                disabled={mlLoading}
+                className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+              >
+                <Zap className="w-4 h-4" />
+                {mlLoading ? "Running inference…" : "Run Random Forest Inference"}
+              </button>
+              {mlInferenceResult && (
+                <div className={`mt-4 p-4 rounded-2xl border text-sm font-medium
+                  ${mlInferenceResult.prediction === 1
+                    ? "bg-red-50 border-red-200 text-red-700"
+                    : "bg-green-50 border-green-200 text-green-700"}`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    {mlInferenceResult.prediction === 1
+                      ? <AlertTriangle className="w-4 h-4" />
+                      : <CheckCircle2 className="w-4 h-4" />}
+                    <span className="font-sketch text-base font-bold">
+                      {mlInferenceResult.prediction === 1 ? "Landslide Risk Detected" : "Stable — Low Risk"}
+                    </span>
+                  </div>
+                  <div className="font-mono text-xs">
+                    Confidence: {mlInferenceResult.probability != null
+                      ? `${(mlInferenceResult.probability * 100).toFixed(1)}%` : "—"}
                   </div>
                 </div>
-                <div
-                  className={`px-3 py-1.5 rounded-lg border text-xs font-bold font-mono ${
-                    edgeData.blocked
-                      ? "bg-red-500/20 text-red-300 border-red-500/40"
-                      : "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                  }`}
-                >
-                  {edgeData.blocked ? "BLOCKED / SEVERED" : "OPERATIONAL"}
-                </div>
-              </div>
-            )}
+              )}
+            </div>
+
           </div>
-
-          {/* Transparent Narrative Explanation */}
-          {edgeData?.reasons && (
-            <div className="p-4 rounded-xl bg-slate-900/80 border border-white/10 space-y-2">
-              <div className="flex justify-between items-center text-xs">
-                <span className="font-semibold text-slate-300">Geotechnical Root Cause Assessment</span>
-                <span className="font-mono text-cyan-400 text-[11px]">
-                  Dominant Trigger: <b>{edgeData.reasons.dominant_cause}</b>
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-sans">
-                {edgeData.reasons.explanation}
-              </p>
-            </div>
-          )}
-
-          {/* Three Physics Drivers */}
-          {edgeData?.reasons && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {/* Driver 1: Terrain Slope */}
-              <div className="p-4 rounded-xl bg-slate-950/60 border border-white/[0.08] space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-400 flex items-center gap-1.5">
-                    <Mountain className="w-3.5 h-3.5 text-amber-400" />
-                    Slope Gradient
-                  </span>
-                  <span className="text-[10px] font-mono text-amber-300">40% Weight</span>
-                </div>
-                <div className="text-2xl font-bold text-white font-mono">
-                  {edgeData.reasons.slope_gradient_pct}%
-                </div>
-                <div className="text-[11px] text-slate-400 font-mono">
-                  Contrib: +{(edgeData.reasons.slope_contribution * 100).toFixed(1)}% risk
-                </div>
-              </div>
-
-              {/* Driver 2: Caine Threshold Ratio */}
-              <div className="p-4 rounded-xl bg-slate-950/60 border border-white/[0.08] space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-400 flex items-center gap-1.5">
-                    <Activity className="w-3.5 h-3.5 text-cyan-400" />
-                    Caine Ratio
-                  </span>
-                  <span className="text-[10px] font-mono text-cyan-300">40% Weight</span>
-                </div>
-                <div className="text-2xl font-bold text-white font-mono">
-                  {edgeData.reasons.intensity_ratio}x
-                </div>
-                <div className="text-[11px] text-slate-400 font-mono">
-                  Rain: {edgeData.reasons.hourly_rainfall_mm} mm/hr vs {edgeData.reasons.caine_threshold_mm_hr} Ic
-                </div>
-              </div>
-
-              {/* Driver 3: Soil Moisture */}
-              <div className="p-4 rounded-xl bg-slate-950/60 border border-white/[0.08] space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-400 flex items-center gap-1.5">
-                    <CloudRain className="w-3.5 h-3.5 text-emerald-400" />
-                    Antecedent R72
-                  </span>
-                  <span className="text-[10px] font-mono text-emerald-300">20% Weight</span>
-                </div>
-                <div className="text-2xl font-bold text-white font-mono">
-                  {edgeData.reasons.antecedent_72h_mm} mm
-                </div>
-                <div className="text-[11px] text-slate-400 font-mono">
-                  Contrib: +{(edgeData.reasons.antecedent_contribution * 100).toFixed(1)}% risk
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Interactive Simulation Controls on Selected Segment */}
-          <div className="space-y-4 pt-4 border-t border-white/[0.08]">
-            <span className="text-xs font-mono uppercase tracking-wider text-slate-400">
-              Interactive Calibration Controls for {selectedEdgeId}
-            </span>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-              <div className="space-y-1.5">
-                <div className="flex justify-between font-mono text-[11px]">
-                  <span className="text-slate-400">Hourly Rainfall</span>
-                  <b className="text-white">{rainfallMm} mm/hr</b>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="140"
-                  step="5"
-                  value={rainfallMm}
-                  onChange={(e) => setRainfallMm(Number(e.target.value))}
-                  className="w-full accent-cyan-400 cursor-pointer"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex justify-between font-mono text-[11px]">
-                  <span className="text-slate-400">Prior 24-48h Saturation</span>
-                  <b className="text-white">{prior1} mm</b>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="80"
-                  step="5"
-                  value={prior1}
-                  onChange={(e) => setPrior1(Number(e.target.value))}
-                  className="w-full accent-emerald-400 cursor-pointer"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex justify-between font-mono text-[11px]">
-                  <span className="text-slate-400">Prior 48-72h Saturation</span>
-                  <b className="text-white">{prior2} mm</b>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="80"
-                  step="5"
-                  value={prior2}
-                  onChange={(e) => setPrior2(Number(e.target.value))}
-                  className="w-full accent-emerald-400 cursor-pointer"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Caine Equation Solver & Theory */}
-        <div className="glass-panel p-6 rounded-2xl space-y-6 flex flex-col justify-between">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 uppercase tracking-wider">
-              <Zap className="w-4 h-4" />
-              <span>Caine (1980) Critical Solver</span>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-900 border border-white/10 font-mono text-center space-y-2">
-              <div className="text-slate-400 text-xs">Empirical Himalayan Rainfall Threshold:</div>
-              <div className="text-lg font-bold text-cyan-300">
-                I_c = 14.82 × D^(-0.39)
-              </div>
-              <div className="text-[11px] text-slate-400 pt-1 border-t border-white/10">
-                Duration D: <b className="text-white">{durationHours}h</b> → Critical Threshold:{" "}
-                <b className="text-cyan-400">{calculatedCaineThreshold} mm/hr</b>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs font-mono">
-                <span className="text-slate-400">Cloudburst Duration (D)</span>
-                <span className="text-white">{durationHours} Hours</span>
-              </div>
-              <input
-                type="range"
-                min="0.5"
-                max="6.0"
-                step="0.5"
-                value={durationHours}
-                onChange={(e) => setDurationHours(Number(e.target.value))}
-                className="w-full accent-cyan-400 cursor-pointer"
-              />
-              <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-                <span>0.5h Flash Flood</span>
-                <span>1.0h Standard</span>
-                <span>6.0h Prolonged Monsoon</span>
-              </div>
-            </div>
-
-            <p className="text-xs text-slate-400 leading-relaxed">
-              When intense monsoonal storms concentrate high rainfall within short durations (&lt;2h),
-              soil pore water pressure instantly overcomes internal shear strength on slopes &gt;45%,
-              initiating translational debris avalanches.
-            </p>
-          </div>
-
-          <div className="pt-4 border-t border-white/[0.08]">
-            <button
-              onClick={() => onNavigate("command")}
-              className="w-full py-3 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <span>View On Live Command Deck</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 4. FEATURE IMPORTANCE BAR CHART (Supervised ML Model Diagnostics) */}
-      <div className="glass-panel p-6 sm:p-8 rounded-2xl space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-4">
-          <div>
-            <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-wider">
-              Supervised Machine Learning
-            </span>
-            <h3 className="text-xl font-bold text-white">
-              Random Forest Feature Importances
-            </h3>
-            <p className="text-xs text-slate-400">
-              Weights computed across 100 decision trees calibrated on Himalayan landslide inventories.
-            </p>
-          </div>
-          <div className="text-xs font-mono text-slate-400 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            <span>F1-Score: 93.15%</span>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          {featureImportances.map((item) => (
-            <div key={item.code} className="space-y-1.5">
-              <div className="flex justify-between text-xs font-mono">
-                <span className="text-slate-300 font-semibold">{item.name}</span>
-                <span className="text-white font-bold">{item.weight}%</span>
-              </div>
-              <div className="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-white/5">
-                <div
-                  className={`h-full rounded-full ${item.color} transition-all duration-700`}
-                  style={{ width: `${item.weight * 3.5}%` }}
-                />
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </div>
