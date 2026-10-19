@@ -132,6 +132,10 @@
   }
 }
 
+.font-sketch {
+  font-family: 'Kalam', 'Caveat', cursive, sans-serif;
+}
+
 html, body, #root {
   height: 100%;
   margin: 0;

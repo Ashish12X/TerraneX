@@ -138,7 +138,13 @@ export default function App() {
   }, [selectedSegmentId, mode, currentHour, simRain, simPrior1, simPrior2, simThreshold, timelineData]);
 
   return (
-    <div className="min-h-screen bg-[#050811] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
+    <div
+      className={`min-h-screen flex flex-col font-sans transition-colors duration-300 ${
+        activePage === "overview"
+          ? "bg-[#fafbfc] text-[#0f172a]"
+          : "bg-[#050811] text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200"
+      }`}
+    >
       {/* Universal Luxury Navigation Bar */}
       <Navbar
         activePage={activePage}
